@@ -19,10 +19,7 @@ export default function LoginPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,9 +27,7 @@ export default function LoginPage() {
     setErrors({});
 
     if (!formData.email || !formData.password) {
-      setErrors({
-        general: "Email y contraseña son requeridos",
-      });
+      setErrors({ general: "Email y contraseña son requeridos" });
       return;
     }
 
@@ -41,9 +36,7 @@ export default function LoginPage() {
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
@@ -71,16 +64,19 @@ export default function LoginPage() {
   };
 
   return (
-    <Card>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Iniciar sesión</h1>
-        <p className="text-gray-600 mt-2">
-          Accede a tu cuenta para generar contenido SEO
+    <Card className="p-8" gradient>
+      <div className="text-center mb-8">
+        <div className="w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-brand-600/20">
+          <span className="text-white font-bold text-xl">S</span>
+        </div>
+        <h1 className="text-2xl font-bold text-gray-900">Bienvenido de nuevo</h1>
+        <p className="text-gray-500 mt-1 text-sm">
+          Inicia sesión para acceder a tu cuenta
         </p>
       </div>
 
       {errors.general && (
-        <div className="bg-red-50 text-red-700 p-3 rounded-lg mb-4 text-sm">
+        <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl mb-4 text-sm font-medium">
           {errors.general}
         </div>
       )}
@@ -104,28 +100,20 @@ export default function LoginPage() {
           value={formData.password}
           onChange={handleChange}
           error={errors.password}
+          placeholder="••••••••"
           required
         />
 
-        <Button
-          type="submit"
-          isLoading={isLoading}
-          className="w-full"
-        >
+        <Button type="submit" isLoading={isLoading} className="w-full">
           Iniciar sesión
         </Button>
       </form>
 
-      <div className="mt-6 space-y-3">
-        <p className="text-center text-gray-600">
+      <div className="mt-6 text-center">
+        <p className="text-sm text-gray-500">
           ¿No tienes cuenta?{" "}
-          <Link href="/register" className="text-blue-600 hover:underline">
+          <Link href="/register" className="text-brand-600 font-semibold hover:text-brand-700">
             Regístrate gratis
-          </Link>
-        </p>
-        <p className="text-center">
-          <Link href="/" className="text-blue-600 hover:underline text-sm">
-            Volver a inicio
           </Link>
         </p>
       </div>

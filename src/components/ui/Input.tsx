@@ -12,22 +12,26 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-1.5">
             {label}
           </label>
         )}
         <input
           ref={ref}
           className={classNames(
-            "w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors",
-            error ? "border-red-500 focus:ring-red-500" : "border-gray-300",
+            "w-full px-4 py-2.5 border-2 rounded-xl text-sm transition-all duration-200",
+            "focus:outline-none focus:ring-4",
+            "placeholder:text-gray-400",
+            error
+              ? "border-red-300 focus:border-red-500 focus:ring-red-100"
+              : "border-gray-200 focus:border-brand-500 focus:ring-brand-100",
             className
           )}
           {...props}
         />
-        {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+        {error && <p className="text-red-500 text-sm mt-1.5 font-medium">{error}</p>}
         {helperText && !error && (
-          <p className="text-gray-500 text-sm mt-1">{helperText}</p>
+          <p className="text-gray-400 text-sm mt-1.5">{helperText}</p>
         )}
       </div>
     );

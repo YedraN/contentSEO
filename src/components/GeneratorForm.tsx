@@ -6,6 +6,7 @@ import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
 import { COMPANY_TYPES, CONTENT_TONE_OPTIONS } from "@/lib/prompts";
 import toast from "react-hot-toast";
+import { classNames } from "@/lib/utils";
 
 interface GeneratorFormProps {
   onSuccess?: (articles: any[]) => void;
@@ -108,35 +109,47 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
   };
 
   return (
-    <Card>
-      <h2 className="text-2xl font-bold mb-6">Generar Artículos SEO</h2>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <Input
-          label="Nombre de la empresa"
-          name="companyName"
-          value={formData.companyName}
-          onChange={handleInputChange}
-          placeholder="Ej: Tech Solutions"
-          required
-        />
-
+    <Card hover>
+      <div className="flex items-center gap-3 mb-8">
+        <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center text-white shadow-lg shadow-brand-600/20">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+          </svg>
+        </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de empresa</label>
-          <select
-            name="companyType"
-            value={formData.companyType}
+          <h2 className="text-xl font-bold text-gray-900">Generar Artículos SEO</h2>
+          <p className="text-sm text-gray-500">Completa los campos para generar contenido optimizado</p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid md:grid-cols-2 gap-5">
+          <Input
+            label="Nombre de la empresa"
+            name="companyName"
+            value={formData.companyName}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {COMPANY_TYPES.map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
+            placeholder="Ej: Tech Solutions"
+            required
+          />
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tipo de empresa</label>
+            <select
+              name="companyType"
+              value={formData.companyType}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200"
+            >
+              {COMPANY_TYPES.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Palabras clave</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1.5">Palabras clave</label>
           <div className="flex gap-2 mb-3">
             <Input
               value={formData.keywordInput}
@@ -144,57 +157,92 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
               onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addKeyword(); } }}
               placeholder="Escribe una palabra clave y presiona Enter"
             />
-            <Button type="button" variant="secondary" onClick={addKeyword} className="whitespace-nowrap">
+            <Button type="button" variant="secondary" onClick={addKeyword} className="whitespace-nowrap shrink-0">
               Agregar
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
             {formData.keywords.map((keyword, index) => (
-              <div key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+              <span
+                key={index}
+                className="inline-flex items-center gap-1.5 bg-brand-50 text-brand-700 px-3 py-1.5 rounded-lg text-sm font-medium"
+              >
                 {keyword}
-                <button type="button" onClick={() => removeKeyword(index)} className="text-blue-600 hover:text-blue-800">×</button>
-              </div>
+                <button
+                  type="button"
+                  onClick={() => removeKeyword(index)}
+                  className="w-4 h-4 rounded-full bg-brand-200 hover:bg-brand-300 flex items-center justify-center text-brand-700 text-xs transition-colors"
+                >
+                  ×
+                </button>
+              </span>
             ))}
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Tono del contenido</label>
-          <select
-            name="tone"
-            value={formData.tone}
-            onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {CONTENT_TONE_OPTIONS.map((tone) => (
-              <option key={tone} value={tone}>{tone.charAt(0).toUpperCase() + tone.slice(1)}</option>
-            ))}
-          </select>
+        <div className="grid md:grid-cols-2 gap-5">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tono del contenido</label>
+            <select
+              name="tone"
+              value={formData.tone}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200"
+            >
+              {CONTENT_TONE_OPTIONS.map((tone) => (
+                <option key={tone} value={tone}>
+                  {tone.charAt(0).toUpperCase() + tone.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              Número de artículos
+            </label>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, numArticles: n }))}
+                  className={classNames(
+                    "w-10 h-10 rounded-xl text-sm font-semibold transition-all duration-200",
+                    formData.numArticles === n
+                      ? "bg-brand-600 text-white shadow-md"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  )}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Número de artículos (1-5)</label>
-          <input
-            type="number"
-            name="numArticles"
-            value={formData.numArticles}
-            onChange={handleInputChange}
-            min="1"
-            max="5"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+        <div className={classNames("p-4 rounded-xl bg-gradient-to-r from-brand-50 to-purple-50 border border-brand-100",
+          isLoading && "animate-pulse"
+        )}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-semibold text-gray-900">Resumen</span>
+            <span className="text-xs text-gray-500">1 crédito por artículo</span>
+          </div>
+          <p className="text-sm text-gray-600">
+            {formData.keywords.length} palabra(s) clave · Tono {formData.tone} · {formData.numArticles} artículo(s)
+          </p>
         </div>
 
         <Button
           type="submit"
           isLoading={isLoading}
           disabled={isLoading || formData.keywords.length === 0}
-          className="w-full"
+          className="w-full text-base py-3"
         >
-          {isLoading ? "Generando..." : "Generar Artículos"}
+          {isLoading ? "Generando artículos..." : `Generar ${formData.numArticles} artículo${formData.numArticles > 1 ? "s" : ""}`}
         </Button>
 
-        <p className="text-sm text-gray-500 text-center">
+        <p className="text-xs text-gray-400 text-center">
           Esto puede tomar 10-30 segundos por artículo
         </p>
       </form>
