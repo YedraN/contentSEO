@@ -83,13 +83,23 @@ function parseJSONResponse(text: string): unknown {
     cleaned = jsonMatch[0];
   }
 
-  cleaned = cleaned
-    .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, "")
-    .replace(/\r\n?/g, "\\n")
-    .replace(/\n/g, "\\n")
-    .replace(/\t/g, "\\t");
+  cleaned = cleaned.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, "");
 
-  return JSON.parse(cleaned);
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    let inString = false;
+    let escapeNext = false;
+    let result = "";
+    for (const ch of cleaned) {
+      if (escapeNext) { escapeNext = false; result += ch; continue }
+      if (ch === "\\") { escapeNext = true; result += ch; continue }
+      if (ch === '"') { inString = !inString; result += ch; continue }
+      if (inString && (ch === "\n" || ch === "\r")) { result += "\\n"; continue }
+      result += ch;
+    }
+    return JSON.parse(result);
+  }
 }
 
 function rotateArray<T>(array: T[], times: number): T[] {

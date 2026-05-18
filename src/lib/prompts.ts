@@ -26,9 +26,9 @@ Article Structure:
 
 CRITICAL RULES:
 - Respond ONLY with valid JSON, NO markdown, NO code blocks, NO extra text
-- Escape all special characters in strings (use \\n for newlines, \\" for quotes)
-- Do NOT use literal newlines inside JSON strings
-- The "content" field must be valid HTML with all special characters escaped
+- The "content" field contains HTML — put ALL the HTML on ONE SINGLE LINE
+- Do NOT use any literal newlines anywhere in the JSON
+- Escape double quotes inside strings as \"
 - Structure:
 {
   "title": "Article title",
