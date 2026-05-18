@@ -3,7 +3,18 @@
     "allow": [
       "Read(//c/Users/FDCV/Documents/**)",
       "Bash(npx create-next-app@latest contentSEO --typescript --tailwind --app --eslint --no-git --import-alias '@/*')",
-      "Bash(npx create-next-app@latest contentseo --typescript --tailwind --app --eslint --no-git --import-alias '@/*')"
+      "Bash(npx create-next-app@latest contentseo --typescript --tailwind --app --eslint --no-git --import-alias '@/*')",
+      "Bash(npm install *)",
+      "Bash(npx prisma *)",
+      "Bash(node -e \"const t = require\\('./node_modules/tailwindcss/package.json'\\); console.log\\('Tailwind version:', t.version\\)\")",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(echo \"Server started, PID: $!\")",
+      "Read(//tmp/**)",
+      "Bash(curl *)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(echo \"PID: $!\")"
     ]
   }
 }

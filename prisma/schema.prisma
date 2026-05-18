@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String          @id @default(cuid())
+  email         String          @unique
+  password      String
+  name          String?
+  credits       Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  articles         Article[]
+  creditPurchases  CreditPurchase[]
+
+  @@map("users")
+}
+
+model Article {
+  id            String          @id @default(cuid())
+  userId        String
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title         String
+  content       String          @db.Text
+  keywords      String[]
+  companyName   String
+  companyType   String
+  metaDescription String?
+  readingTime   Int?
+
+  downloadedAt  DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@map("articles")
+}
+
+model CreditPurchase {
+  id            String          @id @default(cuid())
+  userId        String
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  stripeSessionId String?
+  amount        Int             // Número de créditos
+  price         Float           // Precio en USD
+  status        String          @default("pending") // pending, completed, failed
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@map("credit_purchases")
+}
