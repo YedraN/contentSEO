@@ -55,9 +55,9 @@ export default function Navbar() {
             {isAuthenticated ? (
               <>
                 <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 transition">Dashboard</Link>
-                <Link href="/dashboard/generator" className="text-gray-600 hover:text-gray-900 transition">Generar</Link>
-                <Link href="/dashboard/history" className="text-gray-600 hover:text-gray-900 transition">Historial</Link>
-                <Link href="/dashboard/credits" className="text-gray-600 hover:text-gray-900 transition">Créditos</Link>
+                <Link href="/generator" className="text-gray-600 hover:text-gray-900 transition">Generar</Link>
+                <Link href="/history" className="text-gray-600 hover:text-gray-900 transition">Historial</Link>
+                <Link href="/credits" className="text-gray-600 hover:text-gray-900 transition">Créditos</Link>
                 <div className="flex items-center gap-4 border-l border-gray-200 pl-4">
                   <span className="text-sm text-gray-600">{userName}</span>
                   <Button variant="ghost" size="sm" onClick={handleLogout}>Salir</Button>
@@ -89,9 +89,9 @@ export default function Navbar() {
             {isAuthenticated ? (
               <>
                 <Link href="/dashboard" className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Dashboard</Link>
-                <Link href="/dashboard/generator" className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Generar</Link>
-                <Link href="/dashboard/history" className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Historial</Link>
-                <Link href="/dashboard/credits" className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Créditos</Link>
+                <Link href="/generator" className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Generar</Link>
+                <Link href="/history" className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Historial</Link>
+                <Link href="/credits" className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Créditos</Link>
                 <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full justify-start">Salir</Button>
               </>
             ) : (

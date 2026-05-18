@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 const publicRoutes = ["/", "/login", "/register", "/api/auth/login", "/api/auth/register"];
-const protectedRoutes = ["/dashboard", "/api/generate", "/api/credits"];
+const protectedRoutes = ["/dashboard", "/generator", "/history", "/credits", "/settings", "/api/generate", "/api/credits"];
 
 const getSecret = () => new TextEncoder().encode(process.env.JWT_SECRET!);
 

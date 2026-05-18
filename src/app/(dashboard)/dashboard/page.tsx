@@ -53,7 +53,7 @@ export default function DashboardPage() {
             </div>
             <div className="text-5xl">🎫</div>
           </div>
-          <Link href="/dashboard/credits" className="mt-4 block">
+          <Link href="/credits" className="mt-4 block">
             <Button className="w-full">Comprar más créditos</Button>
           </Link>
         </Card>
@@ -68,7 +68,7 @@ export default function DashboardPage() {
             </div>
             <div className="text-5xl">✍️</div>
           </div>
-          <Link href="/dashboard/generator" className="mt-4 block">
+          <Link href="/generator" className="mt-4 block">
             <Button className="w-full">Ir al generador</Button>
           </Link>
         </Card>
@@ -77,7 +77,7 @@ export default function DashboardPage() {
       <Card>
         <h2 className="text-xl font-bold mb-4">Acceso rápido</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link href="/dashboard/generator">
+          <Link href="/generator">
             <div className="p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition cursor-pointer">
               <p className="font-semibold text-blue-900">Generar artículos</p>
               <p className="text-sm text-blue-700 mt-1">
@@ -86,7 +86,7 @@ export default function DashboardPage() {
             </div>
           </Link>
 
-          <Link href="/dashboard/history">
+          <Link href="/history">
             <div className="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition cursor-pointer">
               <p className="font-semibold text-green-900">Historial</p>
               <p className="text-sm text-green-700 mt-1">
@@ -95,7 +95,7 @@ export default function DashboardPage() {
             </div>
           </Link>
 
-          <Link href="/dashboard/credits">
+          <Link href="/credits">
             <div className="p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition cursor-pointer">
               <p className="font-semibold text-purple-900">Créditos</p>
               <p className="text-sm text-purple-700 mt-1">
