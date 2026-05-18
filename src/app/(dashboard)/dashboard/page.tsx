@@ -74,7 +74,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {statCards.map((card, i) => (
           <Card key={i} hover gradient>
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between mb-4 p-3">
               <div>
                 <p className="text-sm text-gray-500 font-medium">{card.label}</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">{card.value}</p>
@@ -94,7 +94,7 @@ export default function DashboardPage() {
 
       <Card>
         <h2 className="text-lg font-bold text-gray-900 mb-4">Acceso rápido</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-3">
           {quickLinks.map((link) => (
             <Link key={link.href} href={link.href}>
               <div className={`p-4 rounded-xl ${link.color} transition-all duration-200 cursor-pointer`}>

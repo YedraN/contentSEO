@@ -18,7 +18,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
             ? "bg-gradient-to-br from-white to-brand-50/30 border-brand-100"
             : "bg-white border-gray-100",
           hover && "card-hover",
-          "shadow-sm hover:shadow-lg",
+          "shadow-sm hover:shadow-lg p-3",
           className
         )}
         {...props}
