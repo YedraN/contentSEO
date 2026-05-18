@@ -14,35 +14,47 @@ export default function Footer() {
               </div>
               <span className="text-xl font-bold text-white">ContentSEO</span>
             </Link>
-            <p className="text-sm leading-relaxed">
-              Genera contenido SEO optimizado con IA para tu sitio web. Ahorra tiempo y mejora tu posicionamiento.
+            <p className="text-sm leading-relaxed mb-6">
+              La plataforma de contenido SEO white-label para agencias de marketing que quieren escalar sin contratar redactores.
             </p>
+            <a
+              href="mailto:hola@contentseo.io"
+              className="text-sm text-brand-400 hover:text-brand-300 transition-colors font-medium"
+            >
+              hola@contentseo.io
+            </a>
           </div>
 
           <div>
             <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Producto</h3>
             <ul className="space-y-3">
-              <li><Link href="/generator" className="text-sm hover:text-white transition-colors">Generador</Link></li>
-              <li><Link href="/credits" className="text-sm hover:text-white transition-colors">Precios</Link></li>
-              <li><Link href="/login" className="text-sm hover:text-white transition-colors">API</Link></li>
+              <li><Link href="/#features" className="text-sm hover:text-white transition-colors">Características</Link></li>
+              <li><Link href="/#pricing" className="text-sm hover:text-white transition-colors">Precios</Link></li>
+              <li><Link href="/register" className="text-sm hover:text-white transition-colors">Acceso gratis</Link></li>
+              <li><Link href="/login" className="text-sm hover:text-white transition-colors">Iniciar sesión</Link></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Recursos</h3>
+            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Para agencias</h3>
             <ul className="space-y-3">
-              <li><Link href="/" className="text-sm hover:text-white transition-colors">Blog</Link></li>
-              <li><Link href="/" className="text-sm hover:text-white transition-colors">Documentación</Link></li>
-              <li><Link href="/" className="text-sm hover:text-white transition-colors">Soporte</Link></li>
+              <li><Link href="/#pricing" className="text-sm hover:text-white transition-colors">White-label</Link></li>
+              <li><Link href="/#pricing" className="text-sm hover:text-white transition-colors">Plan Enterprise</Link></li>
+              <li>
+                <a href="mailto:hola@contentseo.io" className="text-sm hover:text-white transition-colors">
+                  Hablar con ventas
+                </a>
+              </li>
+              <li><Link href="/" className="text-sm hover:text-white transition-colors">Documentación API</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Legal</h3>
             <ul className="space-y-3">
-              <li><Link href="/" className="text-sm hover:text-white transition-colors">Privacidad</Link></li>
-              <li><Link href="/" className="text-sm hover:text-white transition-colors">Términos</Link></li>
-              <li><Link href="/" className="text-sm hover:text-white transition-colors">Cookies</Link></li>
+              <li><Link href="/privacidad" className="text-sm hover:text-white transition-colors">Privacidad</Link></li>
+              <li><Link href="/terminos" className="text-sm hover:text-white transition-colors">Términos de uso</Link></li>
+              <li><Link href="/cookies" className="text-sm hover:text-white transition-colors">Política de cookies</Link></li>
             </ul>
           </div>
         </div>
@@ -50,9 +62,12 @@ export default function Footer() {
         <div className="border-t border-gray-800 py-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm">
           <p>&copy; {currentYear} ContentSEO. Todos los derechos reservados.</p>
           <div className="flex gap-6">
-            <Link href="/" className="hover:text-white transition-colors">Twitter</Link>
-            <Link href="/" className="hover:text-white transition-colors">GitHub</Link>
-            <Link href="/" className="hover:text-white transition-colors">LinkedIn</Link>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+              LinkedIn
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+              Twitter / X
+            </a>
           </div>
         </div>
       </div>
