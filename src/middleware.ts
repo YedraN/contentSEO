@@ -4,7 +4,7 @@ import { verifyToken } from "./lib/auth";
 const publicRoutes = ["/", "/login", "/register", "/api/auth/login", "/api/auth/register"];
 const protectedRoutes = ["/dashboard", "/api/generate", "/api/credits"];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Obtener token del header
@@ -26,7 +26,7 @@ export function middleware(request: NextRequest) {
     }
 
     // Verificar validez del token
-    const decoded = verifyToken(token);
+    const decoded = await verifyToken(token);
     if (!decoded) {
       // Token inválido, redirige a login
       return NextResponse.redirect(new URL("/login", request.url));

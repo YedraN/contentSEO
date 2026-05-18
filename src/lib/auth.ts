@@ -1,9 +1,9 @@
-import jwt from "jsonwebtoken";
+import { SignJWT, jwtVerify } from "jose";
 import bcryptjs from "bcryptjs";
 import { prisma } from "./db";
 import { validateEmail, validatePassword } from "./utils";
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+const getSecret = () => new TextEncoder().encode(process.env.JWT_SECRET!);
 const JWT_EXPIRATION = "30d";
 
 export async function hashPassword(password: string): Promise<string> {
@@ -17,14 +17,20 @@ export async function comparePasswords(
   return bcryptjs.compare(password, hash);
 }
 
-export function createToken(userId: string): string {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
+export async function createToken(userId: string): Promise<string> {
+  return new SignJWT({ userId })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime(JWT_EXPIRATION)
+    .sign(getSecret());
 }
 
-export function verifyToken(token: string): { userId: string } | null {
+export async function verifyToken(
+  token: string
+): Promise<{ userId: string } | null> {
   try {
-    return jwt.verify(token, JWT_SECRET) as { userId: string };
-  } catch (error) {
+    const { payload } = await jwtVerify(token, getSecret());
+    return payload as unknown as { userId: string };
+  } catch {
     return null;
   }
 }
@@ -108,7 +114,7 @@ export async function loginUser(
   }
 
   // Crear token
-  const token = createToken(user.id);
+  const token = await createToken(user.id);
 
   return {
     success: true,

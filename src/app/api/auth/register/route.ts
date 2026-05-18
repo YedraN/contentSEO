@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const token = createToken(result.user!.id);
+    const token = await createToken(result.user!.id);
 
     const response = NextResponse.json(
       {
