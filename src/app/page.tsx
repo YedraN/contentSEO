@@ -184,7 +184,7 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section id="features" ref={featuresRef} className="py-24 bg-white">
+      <section id="features" ref={featuresRef} className="py-24 lg:py-32 scroll-mt-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <p className="text-brand-600 font-semibold text-sm uppercase tracking-wider mb-3">Características</p>
