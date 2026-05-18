@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.7.0",
-    "animejs": "^4.4.1",
+    "animejs": "^3.2.2",
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",
     "date-fns": "^2.30.0",
