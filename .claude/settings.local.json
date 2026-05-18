@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/FDCV/Documents/**)",
+      "Bash(npx create-next-app@latest contentSEO --typescript --tailwind --app --eslint --no-git --import-alias '@/*')",
+      "Bash(npx create-next-app@latest contentseo --typescript --tailwind --app --eslint --no-git --import-alias '@/*')"
+    ]
+  }
+}
