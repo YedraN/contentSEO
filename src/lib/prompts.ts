@@ -24,11 +24,16 @@ Article Structure:
 3. Conclusion (100-150 words)
 4. FAQ section (3-4 questions)
 
-IMPORTANT: Respond ONLY with valid JSON (no markdown, no code blocks). Structure:
+CRITICAL RULES:
+- Respond ONLY with valid JSON, NO markdown, NO code blocks, NO extra text
+- Escape all special characters in strings (use \\n for newlines, \\" for quotes)
+- Do NOT use literal newlines inside JSON strings
+- The "content" field must be valid HTML with all special characters escaped
+- Structure:
 {
   "title": "Article title",
   "metaDescription": "Meta description under 160 chars",
-  "content": "Full article content in HTML format",
+  "content": "Full article content in HTML format (escape all special chars)",
   "keywords": ["keyword1", "keyword2", "keyword3"],
   "readingTime": number (in minutes),
   "slug": "url-friendly-slug"

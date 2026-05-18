@@ -26,12 +26,7 @@ export async function generateArticle(
 
     const responseText = completion.choices[0]?.message?.content || "";
 
-    let cleanedText = responseText
-      .replace(/```json\n?/g, "")
-      .replace(/```\n?/g, "")
-      .trim();
-
-    const article = JSON.parse(cleanedText) as GeneratedArticle;
+    const article = parseJSONResponse(responseText) as GeneratedArticle;
 
     if (!article.title || !article.content) {
       throw new Error("Respuesta incompleta de Groq");
@@ -77,6 +72,26 @@ export async function generateMultipleArticles(
   return articles;
 }
 
+function parseJSONResponse(text: string): unknown {
+  let cleaned = text
+    .replace(/```json\n?/g, "")
+    .replace(/```\n?/g, "")
+    .trim();
+
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    cleaned = jsonMatch[0];
+  }
+
+  cleaned = cleaned
+    .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, "")
+    .replace(/\r\n?/g, "\\n")
+    .replace(/\n/g, "\\n")
+    .replace(/\t/g, "\\t");
+
+  return JSON.parse(cleaned);
+}
+
 function rotateArray<T>(array: T[], times: number): T[] {
   const rotated = [...array];
   for (let i = 0; i < times; i++) {
@@ -112,13 +127,7 @@ Responde SOLO con JSON válido:
     });
 
     const responseText = completion.choices[0]?.message?.content || "";
-
-    let cleanedText = responseText
-      .replace(/```json\n?/g, "")
-      .replace(/```\n?/g, "")
-      .trim();
-
-    const result = JSON.parse(cleanedText);
+    const result = parseJSONResponse(responseText) as { optimizedTitle: string; keywords: string[] };
     return result;
   } catch (error) {
     console.error("Error optimizando para SEO:", error);
