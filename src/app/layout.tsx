@@ -8,9 +8,9 @@ import { Toaster } from "react-hot-toast";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ContentSEO - Generador de Contenido SEO Automático",
+  title: "ContentSEO — Plataforma de contenido SEO para agencias",
   description:
-    "Genera artículos SEO automáticamente para tu sitio web con IA. Optimizado para WordPress y compatible con cualquier CMS.",
+    "Genera 150+ artículos SEO al mes para los clientes de tu agencia. White-label, integración con WordPress y plantillas por industria. Escala sin contratar redactores.",
 };
 
 export default function RootLayout({

@@ -14,7 +14,11 @@
       "Read(//tmp/**)",
       "Bash(curl *)",
       "Bash(pkill -f \"next dev\")",
-      "Bash(echo \"PID: $!\")"
+      "Bash(echo \"PID: $!\")",
+      "mcp__plugin_claude-mem_mcp-search__search",
+      "Bash(npx next *)",
+      "Bash(start npx *)",
+      "PowerShell(cd \"C:\\\\Users\\\\FDCV\\\\Documents\\\\contentSEO\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"npx next dev --port 3000\")"
     ]
   }
 }

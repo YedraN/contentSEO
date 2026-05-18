@@ -137,47 +137,55 @@ export default function Home() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-100/20 rounded-full blur-3xl" />
         </div>
 
-        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center pt-24 pb-16">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 text-center pt-24 pb-16">
           <div className="hero-badge opacity-0 inline-flex items-center gap-2 px-4 py-2 bg-brand-50 border border-brand-200 rounded-full text-sm font-medium text-brand-700 mb-8">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            Generación de contenido con IA
+            Hecho para agencias de marketing y SEO
           </div>
 
-          <h1 className="hero-title opacity-0 text-5xl md:text-7xl font-bold tracking-tight text-balance mb-6">
-            Crea contenido SEO{" "}
-            <span className="gradient-text">que funciona</span>
+          <h1 className="hero-title opacity-0 text-5xl md:text-7xl font-bold tracking-tight text-balance mb-6 leading-[1.05]">
+            Escala tu agencia{" "}
+            <span className="gradient-text">sin contratar redactores</span>
           </h1>
 
-          <p className="hero-sub opacity-0 text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Genera artículos optimizados para buscadores con inteligencia artificial. 
-            Ahorra horas de trabajo y mejora tu posicionamiento web.
+          <p className="hero-sub opacity-0 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
+            Genera <strong className="text-gray-900">150+ artículos SEO al mes</strong> para los clientes de tu agencia.
+            White-label, integración con WordPress y plantillas por industria. Tú lo vendes, nosotros lo generamos.
           </p>
 
           <div className="hero-cta opacity-0 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/register">
               <Button size="lg" className="text-base px-8">
-                Comenzar gratis
+                Solicitar acceso gratis
               </Button>
             </Link>
-            <Link href="#features">
+            <Link href="#pricing">
               <Button variant="outline" size="lg" className="text-base px-8">
-                Ver características
+                Ver planes
               </Button>
             </Link>
           </div>
 
-          <div className="hero-stats opacity-0 mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
+          <p className="hero-cta opacity-0 mt-4 text-sm text-gray-500">
+            Prueba 1 mes gratis · Sin tarjeta · Setup en 5 minutos
+          </p>
+
+          <div className="hero-stats opacity-0 mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
             <div className="text-center">
-              <p className="text-3xl font-bold text-gray-900">10s</p>
-              <p className="text-sm text-gray-500">por artículo</p>
+              <p className="text-3xl md:text-4xl font-bold text-gray-900">150+</p>
+              <p className="text-sm text-gray-500 mt-1">artículos / mes</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-gray-900">1</p>
-              <p className="text-sm text-gray-500">crédito gratis</p>
+              <p className="text-3xl md:text-4xl font-bold text-gray-900">30s</p>
+              <p className="text-sm text-gray-500 mt-1">por artículo</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-gray-900">Groq</p>
-              <p className="text-sm text-gray-500">IA gratuita</p>
+              <p className="text-3xl md:text-4xl font-bold text-gray-900">97%</p>
+              <p className="text-sm text-gray-500 mt-1">menos coste vs. redactor</p>
+            </div>
+            <div className="text-center">
+              <p className="text-3xl md:text-4xl font-bold text-gray-900">White-label</p>
+              <p className="text-sm text-gray-500 mt-1">tu marca, tu dominio</p>
             </div>
           </div>
         </div>
