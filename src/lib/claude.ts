@@ -1,10 +1,12 @@
-import Anthropic from "@anthropic-ai/sdk";
+import Groq from "groq-sdk";
 import { GeneratedArticle } from "@/types";
 import { SEO_ARTICLE_PROMPT } from "./prompts";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.CLAUDE_API_KEY,
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
+
+const MODEL = "llama-3.3-70b-versatile";
 
 export async function generateArticle(
   companyName: string,
@@ -15,19 +17,14 @@ export async function generateArticle(
   try {
     const prompt = SEO_ARTICLE_PROMPT(companyName, companyType, keywords, tone);
 
-    const message = await anthropic.messages.create({
-      model: "claude-3-5-haiku-20241022",
-      max_tokens: 3000,
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
+    const completion = await groq.chat.completions.create({
+      model: MODEL,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+      max_tokens: 4000,
     });
 
-    const responseText =
-      message.content[0].type === "text" ? message.content[0].text : "";
+    const responseText = completion.choices[0]?.message?.content || "";
 
     let cleanedText = responseText
       .replace(/```json\n?/g, "")
@@ -37,12 +34,12 @@ export async function generateArticle(
     const article = JSON.parse(cleanedText) as GeneratedArticle;
 
     if (!article.title || !article.content) {
-      throw new Error("Respuesta incompleta de Claude");
+      throw new Error("Respuesta incompleta de Groq");
     }
 
     return article;
   } catch (error) {
-    console.error("Error generando artículo con Claude:", error);
+    console.error("Error generando artículo con Groq:", error);
     return null;
   }
 }
@@ -107,19 +104,14 @@ Responde SOLO con JSON válido:
   "keywords": ["keyword1", "keyword2"]
 }`;
 
-    const message = await anthropic.messages.create({
-      model: "claude-3-5-haiku-20241022",
+    const completion = await groq.chat.completions.create({
+      model: MODEL,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.3,
       max_tokens: 500,
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
     });
 
-    const responseText =
-      message.content[0].type === "text" ? message.content[0].text : "";
+    const responseText = completion.choices[0]?.message?.content || "";
 
     let cleanedText = responseText
       .replace(/```json\n?/g, "")
