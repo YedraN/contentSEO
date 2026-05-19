@@ -4,25 +4,25 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export const STRIPE_PRODUCTS = {
   starter: {
-    credits: 3,
-    price: 900, // en centavos
-    priceUSD: 9,
-    name: "Starter",
-    description: "3 artículos SEO",
-  },
-  pro: {
     credits: 10,
     price: 2900,
     priceUSD: 29,
-    name: "Pro",
+    name: "Starter",
     description: "10 artículos SEO",
   },
+  pro: {
+    credits: 30,
+    price: 6900,
+    priceUSD: 69,
+    name: "Growth",
+    description: "30 artículos SEO",
+  },
   agency: {
-    credits: 50,
-    price: 9900,
-    priceUSD: 99,
-    name: "Agency",
-    description: "50 artículos SEO",
+    credits: 100,
+    price: 14900,
+    priceUSD: 149,
+    name: "Scale",
+    description: "100 artículos SEO",
   },
 };
 
