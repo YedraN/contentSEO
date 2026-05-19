@@ -100,10 +100,10 @@ export default function DashboardPage() {
           },
           {
             label: "Plan activo",
-            value: "Professional",
-            sub: "1 mes gratis activo",
-            accent: "from-emerald-500 to-emerald-600",
-            action: { href: "/credits", label: "Ver plan" },
+            value: stats.credits > 0 ? "Activo" : "Sin plan",
+            sub: stats.credits > 0 ? `${stats.credits} crédito${stats.credits !== 1 ? "s" : ""} disponible${stats.credits !== 1 ? "s" : ""}` : "Recarga para empezar",
+            accent: stats.credits > 0 ? "from-emerald-500 to-emerald-600" : "from-gray-400 to-gray-500",
+            action: { href: "/credits", label: stats.credits > 0 ? "Ver plan" : "Ver planes" },
           },
         ].map((card, i) => (
           <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3">

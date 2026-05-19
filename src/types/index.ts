@@ -40,6 +40,7 @@ export interface GenerateArticleRequest {
   numArticles?: number;
   language?: string;
   voiceProfileId?: string;
+  clientId?: string;
 }
 
 export interface GeneratedArticle {
@@ -63,6 +64,17 @@ export interface VoiceProfile {
   name: string;
   styleGuide: string;
   sampleCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Client {
+  id: string;
+  userId: string;
+  name: string;
+  companyType: string;
+  defaultTone: string;
+  defaultLanguage: string;
   createdAt: Date;
   updatedAt: Date;
 }

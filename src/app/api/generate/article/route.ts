@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
       numArticles = 1,
       language = "es",
       voiceProfileId,
+      clientId,
     } = body;
 
     if (!companyName || !companyType || !keywords || keywords.length === 0) {
@@ -112,11 +113,12 @@ export async function POST(request: NextRequest) {
             userId: decoded.userId,
             title: article.title,
             content: article.content,
-            keywords: article.keywords,
+            keywords: JSON.stringify(article.keywords),
             companyName,
             companyType,
             metaDescription: article.metaDescription,
             readingTime: article.readingTime,
+            ...(clientId && { clientId }),
           },
         })
       )

@@ -49,8 +49,8 @@ export async function createCheckoutSession(
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/credits?success=true&plan=${plan}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/credits?canceled=true`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/credits?success=true&plan=${plan}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/credits?canceled=true`,
       metadata: {
         userId,
         plan,

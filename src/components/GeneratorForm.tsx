@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
@@ -14,6 +14,14 @@ interface VoiceProfileOption {
   sampleCount: number;
 }
 
+interface ClientOption {
+  id: string;
+  name: string;
+  companyType: string;
+  defaultTone: string;
+  defaultLanguage: string;
+}
+
 interface GeneratorFormProps {
   onSuccess?: (articles: any[]) => void;
 }
@@ -21,6 +29,7 @@ interface GeneratorFormProps {
 export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [voiceProfiles, setVoiceProfiles] = useState<VoiceProfileOption[]>([]);
+  const [clients, setClients] = useState<ClientOption[]>([]);
   const [formData, setFormData] = useState({
     companyName: "",
     companyType: "SaaS",
@@ -30,7 +39,26 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
     numArticles: 1,
     language: "es",
     voiceProfileId: "",
+    clientId: "",
   });
+
+  const loadClient = useCallback(async (clientId: string) => {
+    if (!clientId) return;
+    try {
+      const res = await fetch(`/api/clients/${clientId}`);
+      const d = await res.json();
+      if (d.success && d.data) {
+        setFormData((prev) => ({
+          ...prev,
+          clientId,
+          companyName: d.data.name,
+          companyType: d.data.companyType,
+          tone: d.data.defaultTone as any,
+          language: d.data.defaultLanguage,
+        }));
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     try {
@@ -49,6 +77,13 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
       .then((r) => r.json())
       .then((d) => {
         if (d.success && d.data) setVoiceProfiles(d.data);
+      })
+      .catch(() => {});
+
+    fetch("/api/clients")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.data) setClients(d.data);
       })
       .catch(() => {});
   }, []);
@@ -108,6 +143,7 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
           numArticles: formData.numArticles,
           language: formData.language,
           voiceProfileId: formData.voiceProfileId || undefined,
+          clientId: formData.clientId || undefined,
         }),
       });
 
@@ -159,6 +195,22 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {clients.length > 0 && (
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Cliente</label>
+            <select
+              value={formData.clientId}
+              onChange={(e) => loadClient(e.target.value)}
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200"
+            >
+              <option value="">Sin cliente (escribe manualmente)</option>
+              {clients.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div className="grid md:grid-cols-2 gap-5">
           <Input
             label="Nombre de la empresa"

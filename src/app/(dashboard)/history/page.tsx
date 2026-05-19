@@ -5,6 +5,11 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
+interface ClientInfo {
+  id: string;
+  name: string;
+}
+
 interface ArticleSummary {
   id: string;
   title: string;
@@ -12,6 +17,8 @@ interface ArticleSummary {
   companyName: string;
   readingTime: number | null;
   createdAt: string;
+  client?: { name: string } | null;
+  clientId?: string | null;
 }
 
 const PAGE_SIZE = 10;
@@ -24,17 +31,20 @@ export default function HistoryPage() {
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState("");
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [clients, setClients] = useState<ClientInfo[]>([]);
+  const [clientFilter, setClientFilter] = useState("");
 
-  const fetchArticles = useCallback(async (p: number, q: string) => {
+  const fetchArticles = useCallback(async (p: number, q: string, clientId: string) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page: String(p), limit: String(PAGE_SIZE) });
       if (q) params.set("search", q);
+      if (clientId) params.set("clientId", clientId);
       const res = await fetch(`/api/articles/list?${params}`);
       const data = await res.json();
       if (data.success) {
         setArticles(data.data.articles);
-        setTotal(data.data.total ?? data.data.articles.length);
+        setTotal(data.data.pagination?.total ?? data.data.articles.length);
       }
     } catch {
       toast.error("Error cargando artículos");
@@ -43,7 +53,14 @@ export default function HistoryPage() {
     }
   }, []);
 
-  useEffect(() => { fetchArticles(page, query); }, [page, query, fetchArticles]);
+  useEffect(() => { fetchArticles(page, query, clientFilter); }, [page, query, clientFilter, fetchArticles]);
+
+  useEffect(() => {
+    fetch("/api/clients")
+      .then((r) => r.json())
+      .then((d) => { if (d.success) setClients(d.data); })
+      .catch(() => {});
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,27 +114,42 @@ export default function HistoryPage() {
         </Link>
       </div>
 
-      {/* Búsqueda */}
-      <form onSubmit={handleSearch} className="flex gap-2">
-        <div className="relative flex-1 max-w-sm">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-          </svg>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por título o cliente…"
-            className="w-full pl-9 pr-4 py-2.5 text-sm border-2 border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100 transition-all"
-          />
-        </div>
-        <Button type="submit" variant="secondary" size="sm">Buscar</Button>
-        {query && (
-          <Button type="button" variant="ghost" size="sm" onClick={() => { setSearch(""); setQuery(""); setPage(1); }}>
-            Limpiar
-          </Button>
+      {/* Búsqueda + Filtro cliente */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <form onSubmit={handleSearch} className="flex gap-2 flex-1">
+          <div className="relative flex-1 max-w-sm">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por título o cliente…"
+              className="w-full pl-9 pr-4 py-2.5 text-sm border-2 border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100 transition-all"
+            />
+          </div>
+          <Button type="submit" variant="secondary" size="sm">Buscar</Button>
+          {query && (
+            <Button type="button" variant="ghost" size="sm" onClick={() => { setSearch(""); setQuery(""); setPage(1); }}>
+              Limpiar
+            </Button>
+          )}
+        </form>
+
+        {clients.length > 0 && (
+          <select
+            value={clientFilter}
+            onChange={(e) => { setClientFilter(e.target.value); setPage(1); }}
+            className="px-4 py-2.5 text-sm border-2 border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100 transition-all"
+          >
+            <option value="">Todos los clientes</option>
+            {clients.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
         )}
-      </form>
+      </div>
 
       {/* Lista */}
       {loading ? (
@@ -140,12 +172,12 @@ export default function HistoryPage() {
             </svg>
           </div>
           <h3 className="text-lg font-bold text-gray-900 mb-2">
-            {query ? "Sin resultados" : "No tienes artículos aún"}
+            {query || clientFilter ? "Sin resultados" : "No tienes artículos aún"}
           </h3>
           <p className="text-sm text-gray-500 mb-6">
-            {query ? `No hay artículos que coincidan con "${query}".` : "Genera tu primer artículo SEO para verlo aquí."}
+            {query || clientFilter ? "Prueba con otros filtros." : "Genera tu primer artículo SEO para verlo aquí."}
           </p>
-          {!query && (
+          {!query && !clientFilter && (
             <Link href="/generator"><Button>Ir al generador</Button></Link>
           )}
         </div>
@@ -158,7 +190,10 @@ export default function HistoryPage() {
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-gray-900 leading-snug">{article.title}</p>
                     <div className="flex flex-wrap items-center gap-2 mt-2">
-                      {article.companyName && (
+                      {article.client?.name && (
+                        <span className="text-xs bg-indigo-50 text-indigo-600 font-semibold px-2 py-0.5 rounded-full">{article.client.name}</span>
+                      )}
+                      {article.companyName && !article.client?.name && (
                         <span className="text-xs text-gray-500 font-medium">{article.companyName}</span>
                       )}
                       <span className="text-gray-300">·</span>
@@ -186,7 +221,6 @@ export default function HistoryPage() {
                     </div>
                   </div>
 
-                  {/* Acciones */}
                   <div className="flex items-center gap-2 shrink-0">
                     <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
                       {(["markdown", "html", "docx"] as const).map((fmt) => (
@@ -212,24 +246,12 @@ export default function HistoryPage() {
       {/* Paginación */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">
-            Página {page} de {totalPages}
-          </p>
+          <p className="text-sm text-gray-500">Página {page} de {totalPages}</p>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p) => p - 1)}
-              disabled={page === 1}
-            >
+            <Button variant="outline" size="sm" onClick={() => setPage((p) => p - 1)} disabled={page === 1}>
               ← Anterior
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p) => p + 1)}
-              disabled={page === totalPages}
-            >
+            <Button variant="outline" size="sm" onClick={() => setPage((p) => p + 1)} disabled={page === totalPages}>
               Siguiente →
             </Button>
           </div>

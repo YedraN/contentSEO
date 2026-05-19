@@ -57,7 +57,7 @@ export async function GET(
     const articleData = {
       title: article.title,
       content: article.content,
-      keywords: article.keywords,
+      keywords: article.keywords as unknown as string[],
       metaDescription: article.metaDescription || "",
       readingTime: article.readingTime || 5,
     };

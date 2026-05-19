@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -27,6 +27,7 @@ model User {
   articles         Article[]
   creditPurchases  CreditPurchase[]
   voiceProfiles    VoiceProfile[]
+  clients          Client[]
 
   @@map("users")
 }
@@ -37,8 +38,8 @@ model Article {
   user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   title         String
-  content       String          @db.Text
-  keywords      String[]
+  content       String
+  keywords      String
   companyName   String
   companyType   String
   metaDescription String?
@@ -52,6 +53,8 @@ model Article {
 
   voiceProfileId     String?
   voiceProfile       VoiceProfile? @relation(fields: [voiceProfileId], references: [id])
+  clientId           String?
+  client             Client?       @relation(fields: [clientId], references: [id])
 
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
@@ -80,7 +83,7 @@ model VoiceProfile {
   userId        String
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   name          String
-  styleGuide    String    @db.Text
+  styleGuide    String
   sampleCount   Int       @default(0)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -88,4 +91,20 @@ model VoiceProfile {
   articles      Article[]
 
   @@map("voice_profiles")
+}
+
+model Client {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  companyType   String    @default("SaaS")
+  defaultTone   String    @default("professional")
+  defaultLanguage String  @default("es")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  articles      Article[]
+
+  @@map("clients")
 }

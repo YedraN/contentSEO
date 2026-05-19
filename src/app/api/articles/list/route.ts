@@ -26,10 +26,16 @@ export async function GET(request: NextRequest) {
     const page = parseInt(url.searchParams.get("page") || "1");
     const limit = parseInt(url.searchParams.get("limit") || "10");
     const skip = (page - 1) * limit;
+    const clientFilter = url.searchParams.get("clientId") || "";
+
+    const where = { userId: decoded.userId };
+    if (clientFilter) {
+      (where as any).clientId = clientFilter;
+    }
 
     const [articles, total] = await Promise.all([
       prisma.article.findMany({
-        where: { userId: decoded.userId },
+        where,
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
@@ -41,9 +47,11 @@ export async function GET(request: NextRequest) {
           companyType: true,
           readingTime: true,
           createdAt: true,
+          clientId: true,
+          client: { select: { name: true } },
         },
       }),
-      prisma.article.count({ where: { userId: decoded.userId } }),
+      prisma.article.count({ where }),
     ]);
 
     return NextResponse.json(

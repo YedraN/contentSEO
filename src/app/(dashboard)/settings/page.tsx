@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import { LANGUAGE_OPTIONS, CONTENT_TONE_OPTIONS } from "@/lib/prompts";
+import { COMPANY_TYPES, LANGUAGE_OPTIONS, CONTENT_TONE_OPTIONS } from "@/lib/prompts";
 import toast from "react-hot-toast";
 import Link from "next/link";
 
@@ -263,6 +263,9 @@ export default function SettingsPage() {
             </div>
           </form>
         </div>
+
+        {/* Clientes */}
+        <ClientsSection />
 
         {/* Preferencias */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -670,6 +673,171 @@ function VoiceTrainingSection() {
           La IA analizará tus artículos y extraerá tu estilo único: tono, vocabulario, ritmo y recursos retóricos. Luego podrás seleccionar esta voz al generar nuevos artículos.
         </p>
       </form>
+    </div>
+  );
+}
+
+interface ClientItem {
+  id: string;
+  name: string;
+  companyType: string;
+  defaultTone: string;
+  defaultLanguage: string;
+  articleCount: number;
+  createdAt: string;
+}
+
+function ClientsSection() {
+  const [clients, setClients] = useState<ClientItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<ClientItem | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [formName, setFormName] = useState("");
+  const [formType, setFormType] = useState("SaaS");
+  const [formTone, setFormTone] = useState("professional");
+  const [formLang, setFormLang] = useState("es");
+  const [saving, setSaving] = useState(false);
+
+  const loadClients = async () => {
+    try {
+      const res = await fetch("/api/clients");
+      const d = await res.json();
+      if (d.success) setClients(d.data);
+    } catch {}
+    setLoading(false);
+  };
+
+  useEffect(() => { loadClients(); }, []);
+
+  const openNew = () => {
+    setEditing(null);
+    setFormName("");
+    setFormType("SaaS");
+    setFormTone("professional");
+    setFormLang("es");
+    setShowForm(true);
+  };
+
+  const openEdit = (c: ClientItem) => {
+    setEditing(c);
+    setFormName(c.name);
+    setFormType(c.companyType);
+    setFormTone(c.defaultTone);
+    setFormLang(c.defaultLanguage);
+    setShowForm(true);
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formName.trim()) { toast.error("El nombre es requerido"); return; }
+    setSaving(true);
+    try {
+      const url = editing ? `/api/clients/${editing.id}` : "/api/clients";
+      const method = editing ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: formName, companyType: formType, defaultTone: formTone, defaultLanguage: formLang }),
+      });
+      const d = await res.json();
+      if (d.success) {
+        toast.success(editing ? "Cliente actualizado" : "Cliente creado");
+        setShowForm(false);
+        loadClients();
+      } else {
+        toast.error(d.error || "Error guardando cliente");
+      }
+    } catch {
+      toast.error("Error guardando cliente");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("¿Eliminar este cliente? Los artículos no se eliminarán.")) return;
+    try {
+      const res = await fetch(`/api/clients/${id}`, { method: "DELETE" });
+      const d = await res.json();
+      if (d.success) { toast.success("Cliente eliminado"); loadClients(); }
+    } catch {
+      toast.error("Error eliminando cliente");
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+          {SECTION_ICON("M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z")}
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-gray-900">Clientes</h2>
+          <p className="text-xs text-gray-500">Gestiona los clientes de tu agencia</p>
+        </div>
+      </div>
+
+      {loading ? (
+        <p className="text-sm text-gray-400">Cargando clientes...</p>
+      ) : (
+        <div className="space-y-3">
+          {clients.length === 0 && !showForm && (
+            <p className="text-sm text-gray-500 mb-4">Aún no tienes clientes creados. Al crear clientes, el generador autocompletará los datos de cada uno.</p>
+          )}
+
+          {clients.map((c) => (
+            <div key={c.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">{c.name}</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {c.companyType} · Tono: {c.defaultTone} · {c.articleCount} artículo{c.articleCount !== 1 ? "s" : ""}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => openEdit(c)} className="text-xs text-brand-600 font-semibold hover:underline">Editar</button>
+                <button onClick={() => handleDelete(c.id)} className="text-xs text-red-500 font-semibold hover:underline">Eliminar</button>
+              </div>
+            </div>
+          ))}
+
+          {showForm && (
+            <form onSubmit={handleSave} className="p-4 border-2 border-brand-100 bg-brand-50/30 rounded-xl space-y-4">
+              <p className="text-sm font-semibold text-gray-900">{editing ? "Editar cliente" : "Nuevo cliente"}</p>
+              <div className="grid grid-cols-2 gap-4">
+                <Input label="Nombre del cliente" value={formName} onChange={(e) => setFormName(e.target.value)} placeholder="Ej: Prometeo Marketing" />
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Industria</label>
+                  <select value={formType} onChange={(e) => setFormType(e.target.value)} className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100">
+                    {COMPANY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tono por defecto</label>
+                  <select value={formTone} onChange={(e) => setFormTone(e.target.value)} className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100">
+                    {CONTENT_TONE_OPTIONS.map((t) => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Idioma por defecto</label>
+                  <select value={formLang} onChange={(e) => setFormLang(e.target.value)} className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100">
+                    {LANGUAGE_OPTIONS.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-1">
+                <Button type="submit" disabled={saving} isLoading={saving}>{saving ? "Guardando..." : "Guardar cliente"}</Button>
+                <Button type="button" variant="secondary" onClick={() => setShowForm(false)}>Cancelar</Button>
+              </div>
+            </form>
+          )}
+
+          {!showForm && (
+            <button onClick={openNew} className="text-sm text-brand-600 font-semibold hover:underline">
+              + Agregar cliente
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
