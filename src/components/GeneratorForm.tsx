@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
-import { COMPANY_TYPES, CONTENT_TONE_OPTIONS } from "@/lib/prompts";
+import { COMPANY_TYPES, CONTENT_TONE_OPTIONS, LANGUAGE_OPTIONS } from "@/lib/prompts";
 import toast from "react-hot-toast";
 import { classNames } from "@/lib/utils";
+
+interface VoiceProfileOption {
+  id: string;
+  name: string;
+  sampleCount: number;
+}
 
 interface GeneratorFormProps {
   onSuccess?: (articles: any[]) => void;
@@ -14,6 +20,7 @@ interface GeneratorFormProps {
 
 export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [voiceProfiles, setVoiceProfiles] = useState<VoiceProfileOption[]>([]);
   const [formData, setFormData] = useState({
     companyName: "",
     companyType: "SaaS",
@@ -21,7 +28,30 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
     keywordInput: "",
     tone: "professional" as "professional" | "casual" | "technical" | "friendly",
     numArticles: 1,
+    language: "es",
+    voiceProfileId: "",
   });
+
+  useEffect(() => {
+    try {
+      const prefs = localStorage.getItem("contentSEO_prefs");
+      if (prefs) {
+        const parsed = JSON.parse(prefs);
+        setFormData((prev) => ({
+          ...prev,
+          language: parsed.defaultLanguage ?? prev.language,
+          tone: parsed.defaultTone ?? prev.tone,
+        }));
+      }
+    } catch {}
+
+    fetch("/api/voice/profiles")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.data) setVoiceProfiles(d.data);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -76,6 +106,8 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
           keywords: formData.keywords,
           tone: formData.tone,
           numArticles: formData.numArticles,
+          language: formData.language,
+          voiceProfileId: formData.voiceProfileId || undefined,
         }),
       });
 
@@ -92,14 +124,15 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
         onSuccess(data.data.articles);
       }
 
-      setFormData({
+      setFormData((prev) => ({
+        ...prev,
         companyName: "",
         companyType: "SaaS",
         keywords: [],
         keywordInput: "",
         tone: "professional",
         numArticles: 1,
-      });
+      }));
     } catch (error) {
       console.error("Error:", error);
       toast.error("Error generando artículos");
@@ -107,6 +140,9 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
       setIsLoading(false);
     }
   };
+
+  const selectedLanguageLabel =
+    LANGUAGE_OPTIONS.find((l) => l.value === formData.language)?.label ?? formData.language;
 
   return (
     <Card hover>
@@ -180,7 +216,21 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid md:grid-cols-3 gap-5">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Idioma del artículo</label>
+            <select
+              name="language"
+              value={formData.language}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200"
+            >
+              {LANGUAGE_OPTIONS.map((l) => (
+                <option key={l.value} value={l.value}>{l.label}</option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tono del contenido</label>
             <select
@@ -221,6 +271,27 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
           </div>
         </div>
 
+        {voiceProfiles.length > 0 && (
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Voz del autor</label>
+            <select
+              value={formData.voiceProfileId}
+              onChange={(e) => setFormData((prev) => ({ ...prev, voiceProfileId: e.target.value }))}
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200"
+            >
+              <option value="">Estilo predeterminado</option>
+              {voiceProfiles.map((vp) => (
+                <option key={vp.id} value={vp.id}>
+                  {vp.name} ({vp.sampleCount} artículo{vp.sampleCount !== 1 ? "s" : ""})
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-400 mt-1.5">
+              Elige un perfil de voz entrenado para que la IA imite ese estilo
+            </p>
+          </div>
+        )}
+
         <div className={classNames("p-4 rounded-xl bg-gradient-to-r from-brand-50 to-purple-50 border border-brand-100",
           isLoading && "animate-pulse"
         )}>
@@ -229,7 +300,7 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
             <span className="text-xs text-gray-500">1 crédito por artículo</span>
           </div>
           <p className="text-sm text-gray-600">
-            {formData.keywords.length} palabra(s) clave · Tono {formData.tone} · {formData.numArticles} artículo(s)
+            {formData.keywords.length} palabra(s) clave · {selectedLanguageLabel} · Tono {formData.tone} · {formData.numArticles} artículo(s)
           </p>
         </div>
 

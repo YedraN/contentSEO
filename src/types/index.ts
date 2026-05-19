@@ -38,6 +38,8 @@ export interface GenerateArticleRequest {
   keywords: string[];
   tone?: "professional" | "casual" | "technical" | "friendly";
   numArticles?: number;
+  language?: string;
+  voiceProfileId?: string;
 }
 
 export interface GeneratedArticle {
@@ -53,4 +55,14 @@ export interface ApiResponse<T> {
   data?: T;
   error?: string;
   message?: string;
+}
+
+export interface VoiceProfile {
+  id: string;
+  userId: string;
+  name: string;
+  styleGuide: string;
+  sampleCount: number;
+  createdAt: Date;
+  updatedAt: Date;
 }

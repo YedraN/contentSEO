@@ -19,8 +19,14 @@ model User {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
+  wordpressUrl         String?
+  wordpressUsername    String?
+  wordpressPassword    String?
+  wordpressConnected   Boolean @default(false)
+
   articles         Article[]
   creditPurchases  CreditPurchase[]
+  voiceProfiles    VoiceProfile[]
 
   @@map("users")
 }
@@ -39,6 +45,14 @@ model Article {
   readingTime   Int?
 
   downloadedAt  DateTime?
+  wordpressPostId      Int?
+  wordpressPostUrl     String?
+  publishedToWp      Boolean @default(false)
+  publishedToWpAt      DateTime?
+
+  voiceProfileId     String?
+  voiceProfile       VoiceProfile? @relation(fields: [voiceProfileId], references: [id])
+
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
@@ -59,4 +73,19 @@ model CreditPurchase {
   updatedAt     DateTime        @updatedAt
 
   @@map("credit_purchases")
+}
+
+model VoiceProfile {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  styleGuide    String    @db.Text
+  sampleCount   Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  articles      Article[]
+
+  @@map("voice_profiles")
 }

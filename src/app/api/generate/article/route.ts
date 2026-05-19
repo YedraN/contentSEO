@@ -31,6 +31,8 @@ export async function POST(request: NextRequest) {
       keywords,
       tone = "professional",
       numArticles = 1,
+      language = "es",
+      voiceProfileId,
     } = body;
 
     if (!companyName || !companyType || !keywords || keywords.length === 0) {
@@ -66,12 +68,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let styleGuide: string | undefined;
+    if (voiceProfileId) {
+      const profile = await prisma.voiceProfile.findUnique({
+        where: { id: voiceProfileId },
+      });
+      if (profile && profile.userId === decoded.userId) {
+        const parsed = JSON.parse(profile.styleGuide);
+        styleGuide = parsed.styleGuide;
+      }
+    }
+
     const articles = await generateMultipleArticles(
       companyName,
       companyType,
       keywords,
       tone,
-      numArticles
+      numArticles,
+      language,
+      styleGuide
     );
 
     if (articles.length === 0) {

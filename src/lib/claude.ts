@@ -12,10 +12,12 @@ export async function generateArticle(
   companyName: string,
   companyType: string,
   keywords: string[],
-  tone: "professional" | "casual" | "technical" | "friendly" = "professional"
+  tone: "professional" | "casual" | "technical" | "friendly" = "professional",
+  language: string = "es",
+  styleGuide?: string
 ): Promise<GeneratedArticle | null> {
   try {
-    const prompt = SEO_ARTICLE_PROMPT(companyName, companyType, keywords, tone);
+    const prompt = SEO_ARTICLE_PROMPT(companyName, companyType, keywords, tone, language, styleGuide);
 
     const completion = await groq.chat.completions.create({
       model: MODEL,
@@ -44,7 +46,9 @@ export async function generateMultipleArticles(
   companyType: string,
   keywords: string[],
   tone: "professional" | "casual" | "technical" | "friendly" = "professional",
-  numArticles: number = 1
+  numArticles: number = 1,
+  language: string = "es",
+  styleGuide?: string
 ): Promise<GeneratedArticle[]> {
   const articles: GeneratedArticle[] = [];
 
@@ -55,7 +59,9 @@ export async function generateMultipleArticles(
       companyName,
       companyType,
       variedKeywords,
-      tone
+      tone,
+      language,
+      styleGuide
     );
 
     if (article) {

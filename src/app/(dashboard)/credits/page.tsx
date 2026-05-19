@@ -1,15 +1,70 @@
 "use client";
 
 import { useState } from "react";
-import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { classNames } from "@/lib/utils";
 
 const PLANS = [
-  { id: "starter", name: "Starter", credits: 3, price: 9, pricePerCredit: 3, description: "Perfecto para probar", popular: false },
-  { id: "pro", name: "Pro", credits: 10, price: 29, pricePerCredit: 2.9, description: "Para creadores de contenido", popular: true },
-  { id: "agency", name: "Agency", credits: 50, price: 99, pricePerCredit: 1.98, description: "Para agencias y equipos", popular: false },
+  {
+    id: "starter",
+    name: "Starter",
+    credits: 10,
+    price: 29,
+    pricePerCredit: 2.9,
+    description: "Para agencias que quieren probar el servicio",
+    features: [
+      "10 artículos SEO de 2.000+ palabras",
+      "8 idiomas disponibles",
+      "Exportación .md, .html, .docx",
+      "Sin fecha de caducidad",
+    ],
+    popular: false,
+    color: "text-gray-600",
+  },
+  {
+    id: "pro",
+    name: "Growth",
+    credits: 30,
+    price: 69,
+    pricePerCredit: 2.3,
+    description: "El más elegido por agencias en crecimiento",
+    features: [
+      "30 artículos SEO de 2.000+ palabras",
+      "8 idiomas disponibles",
+      "Exportación .md, .html, .docx",
+      "Sin fecha de caducidad",
+      "Soporte prioritario",
+    ],
+    popular: true,
+    color: "text-brand-600",
+  },
+  {
+    id: "agency",
+    name: "Scale",
+    credits: 100,
+    price: 149,
+    pricePerCredit: 1.49,
+    description: "Para agencias con alta producción de contenido",
+    features: [
+      "100 artículos SEO de 2.000+ palabras",
+      "8 idiomas disponibles",
+      "Exportación .md, .html, .docx",
+      "Sin fecha de caducidad",
+      "Soporte prioritario",
+      "Acceso anticipado a nuevas funciones",
+    ],
+    popular: false,
+    color: "text-gray-600",
+  },
 ];
+
+function CheckIcon() {
+  return (
+    <svg className="w-4 h-4 text-green-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+    </svg>
+  );
+}
 
 export default function CreditsPage() {
   const [loading, setLoading] = useState<string | null>(null);
@@ -35,57 +90,74 @@ export default function CreditsPage() {
 
   return (
     <div className="animate-fade-in">
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold text-gray-900">Planes de créditos</h1>
-        <p className="text-gray-500 mt-2">Elige el plan que mejor se adapte a tus necesidades</p>
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold text-gray-900">Recarga artículos</h1>
+        <p className="text-gray-500 mt-1">Paga solo por lo que necesitas — sin mensualidades ni compromisos</p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+      <div className="grid md:grid-cols-3 gap-6 max-w-5xl">
         {PLANS.map((plan) => (
           <div
             key={plan.id}
             className={classNames(
-              "relative rounded-2xl p-8 border-2 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
+              "relative rounded-2xl p-6 border-2 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col",
               plan.popular
-                ? "border-brand-500 bg-white shadow-lg shadow-brand-500/10"
-                : "border-gray-100 bg-white"
+                ? "border-brand-500 shadow-lg shadow-brand-500/10"
+                : "border-gray-100 shadow-sm"
             )}
           >
             {plan.popular && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-brand-600 to-purple-600 text-white text-xs font-semibold rounded-full">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-brand-600 to-purple-600 text-white text-xs font-bold rounded-full shadow-sm whitespace-nowrap">
                 Más popular
               </div>
             )}
 
-            <div className="text-center mb-6">
-              <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
-              <p className="text-sm text-gray-500 mt-1">{plan.description}</p>
+            <div className="mb-5">
+              <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
+              <p className="text-sm text-gray-500 mt-0.5">{plan.description}</p>
             </div>
 
-            <div className="text-center mb-6">
-              <span className="text-5xl font-bold text-gray-900">${plan.price}</span>
-              <span className="text-gray-400 text-sm ml-1">/ único</span>
+            <div className="mb-1">
+              <span className="text-4xl font-bold text-gray-900">${plan.price}</span>
+              <span className="text-gray-400 text-sm ml-1">/ pago único</span>
             </div>
-
-            <div className="text-center mb-2">
-              <p className="text-3xl font-bold text-brand-600">{plan.credits}</p>
-              <p className="text-sm text-gray-500">artículos</p>
-            </div>
-
-            <p className="text-center text-xs text-gray-400 mb-8">
-              ${plan.pricePerCredit.toFixed(2)} por artículo
+            <p className={classNames("text-sm font-semibold mb-5", plan.color)}>
+              {plan.credits} artículos · ${plan.pricePerCredit.toFixed(2)} c/u
             </p>
+
+            <ul className="space-y-2.5 mb-6 flex-1">
+              {plan.features.map((feature) => (
+                <li key={feature} className="flex items-start gap-2">
+                  <CheckIcon />
+                  <span className="text-sm text-gray-600">{feature}</span>
+                </li>
+              ))}
+            </ul>
 
             <Button
               onClick={() => handlePurchase(plan.id)}
               disabled={loading === plan.id}
+              isLoading={loading === plan.id}
               variant={plan.popular ? "primary" : "outline"}
               className="w-full"
             >
-              {loading === plan.id ? "Procesando..." : `Comprar ${plan.name}`}
+              {loading === plan.id ? "Procesando..." : `Comprar ${plan.credits} artículos`}
             </Button>
           </div>
         ))}
+      </div>
+
+      <div className="mt-10 max-w-5xl p-6 bg-gray-50 border border-gray-100 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <p className="font-semibold text-gray-900">¿Necesitas un volumen mayor?</p>
+          <p className="text-sm text-gray-500 mt-0.5">Contacta con nosotros para un plan personalizado para tu agencia</p>
+        </div>
+        <a
+          href="mailto:hola@contentseo.io"
+          className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-gray-900 text-gray-900 text-sm font-semibold rounded-xl hover:bg-gray-900 hover:text-white transition-all duration-200 whitespace-nowrap"
+        >
+          Hablar con ventas
+        </a>
       </div>
     </div>
   );
