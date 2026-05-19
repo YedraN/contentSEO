@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { classNames } from "@/lib/utils";
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userName, setUserName] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,13 +22,15 @@ export default function Navbar() {
           setIsAuthenticated(true);
           const storedName = localStorage.getItem("userName");
           if (storedName) setUserName(storedName);
+        } else {
+          setIsAuthenticated(false);
         }
       } catch {
         setIsAuthenticated(false);
       }
     };
     checkAuth();
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 20);
@@ -92,9 +95,17 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <>
-                <span className="text-sm text-gray-500 font-medium">{userName}</span>
+                <Link
+                  href="/settings"
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all duration-200"
+                >
+                  <div className="w-7 h-7 bg-gradient-to-br from-brand-400 to-brand-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">
+                    {userName.charAt(0).toUpperCase()}
+                  </div>
+                  <span>{userName}</span>
+                </Link>
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
-                  Salir
+                  Cerrar sesión
                 </Button>
               </>
             ) : (
@@ -157,6 +168,16 @@ export default function Navbar() {
                 </Link>
               ))}
               <hr className="my-2 border-gray-100" />
+              <Link
+                href="/settings"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all"
+              >
+                <div className="w-7 h-7 bg-gradient-to-br from-brand-400 to-brand-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+                Mi perfil
+              </Link>
               <button
                 onClick={() => { setIsMenuOpen(false); handleLogout(); }}
                 className="w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-all"
