@@ -62,6 +62,7 @@ export default function RegisterPage() {
         return;
       }
 
+      localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("userName", formData.name);
       localStorage.setItem("agencyName", formData.agencyName);
       toast.success("¡Cuenta creada! Bienvenido a ContentSEO");

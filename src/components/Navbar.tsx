@@ -15,18 +15,28 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
+    const storedName = localStorage.getItem("userName");
+    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+
+    if (loggedIn && storedName) {
+      setIsAuthenticated(true);
+      setUserName(storedName);
+    }
+
     const checkAuth = async () => {
       try {
         const response = await fetch("/api/credits/check");
         if (response.ok) {
           setIsAuthenticated(true);
-          const storedName = localStorage.getItem("userName");
-          if (storedName) setUserName(storedName);
+          const name = localStorage.getItem("userName");
+          if (name) setUserName(name);
         } else {
           setIsAuthenticated(false);
+          localStorage.removeItem("isLoggedIn");
+          localStorage.removeItem("userName");
         }
       } catch {
-        setIsAuthenticated(false);
+        // keep optimistic state from localStorage
       }
     };
     checkAuth();
@@ -41,6 +51,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
+      localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("userName");
       setIsAuthenticated(false);
       router.push("/");

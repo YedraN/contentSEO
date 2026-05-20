@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import { COMPANY_TYPES, LANGUAGE_OPTIONS, CONTENT_TONE_OPTIONS } from "@/lib/prompts";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 function SectionIcon({ path, color }: { path: string; color: string }) {
   return (
@@ -18,6 +19,7 @@ function SectionIcon({ path, color }: { path: string; color: string }) {
 }
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [credits, setCredits] = useState<number | null>(null);
 
   const [name, setName] = useState("");
@@ -461,6 +463,37 @@ export default function SettingsPage() {
               </div>
             </form>
           )}
+        </div>
+
+        {/* Cerrar sesión */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <SectionIcon
+              color="bg-red-50 text-red-600"
+              path="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
+            />
+            <div>
+              <h2 className="text-base font-bold text-gray-900">Sesión</h2>
+              <p className="text-xs text-gray-500">Cierra tu sesión actual</p>
+            </div>
+          </div>
+
+          <button
+            onClick={async () => {
+              try {
+                await fetch("/api/auth/logout", { method: "POST" });
+                localStorage.removeItem("isLoggedIn");
+                localStorage.removeItem("userName");
+                toast.success("Sesión cerrada");
+                router.push("/");
+              } catch {
+                toast.error("Error al cerrar sesión");
+              }
+            }}
+            className="px-5 py-2.5 bg-red-600 text-white text-sm font-semibold rounded-xl hover:bg-red-700 transition-colors shadow-sm"
+          >
+            Cerrar sesión
+          </button>
         </div>
 
         {/* Voz y estilo */}
