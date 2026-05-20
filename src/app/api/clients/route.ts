@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
+import { verifyToken, getUserById } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { hasFeature } from "@/lib/plans";
 
 export async function GET(request: NextRequest) {
   try {
@@ -49,6 +50,14 @@ export async function POST(request: NextRequest) {
     const decoded = await verifyToken(token);
     if (!decoded) {
       return NextResponse.json({ success: false, error: "Token inválido" }, { status: 401 });
+    }
+
+    const user = await getUserById(decoded.userId);
+    if (!user || !hasFeature(user.subscriptionPlan, "multiClient")) {
+      return NextResponse.json(
+        { success: false, error: "Esta feature requiere el plan Pro o Agency" },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();

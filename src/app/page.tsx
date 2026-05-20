@@ -10,7 +10,7 @@ const features = [
       </svg>
     ),
     title: "White-label completo",
-    description: "Tu marca, tu dominio. Tus clientes ven tu agencia, nunca ContentSEO. Personaliza colores, logo e idioma.",
+    description: "Tu marca, tu dominio. Tus clientes ven tu agencia, nunca FeatSEO. Personaliza colores, logo e idioma.",
   },
   {
     icon: (

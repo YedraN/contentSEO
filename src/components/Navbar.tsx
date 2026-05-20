@@ -85,10 +85,10 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 lg:h-20">
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shadow-lg shadow-brand-600/20 group-hover:shadow-xl group-hover:shadow-brand-600/30 transition-all duration-300">
-              <span className="text-white font-bold text-lg">S</span>
+              <span className="text-white font-bold text-lg">F</span>
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              ContentSEO
+              FeatSEO
             </span>
           </Link>
 

@@ -3,6 +3,7 @@ import { verifyToken } from "@/lib/auth";
 import { decrypt } from "@/lib/encryption";
 import { publishPostToWordPress } from "@/lib/wordpress";
 import { prisma } from "@/lib/db";
+import { hasFeature } from "@/lib/plans";
 
 export async function POST(
   request: NextRequest,
@@ -23,10 +24,25 @@ export async function POST(
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
+      select: {
+        id: true,
+        wordpressConnected: true,
+        wordpressUrl: true,
+        wordpressUsername: true,
+        wordpressPassword: true,
+        subscriptionPlan: true,
+      },
     });
 
     if (!user) {
       return NextResponse.json({ success: false, error: "Usuario no encontrado" }, { status: 404 });
+    }
+
+    if (!hasFeature(user.subscriptionPlan, "wordpress")) {
+      return NextResponse.json(
+        { success: false, error: "Esta feature requiere el plan Pro o Agency" },
+        { status: 403 }
+      );
     }
 
     if (!user.wordpressConnected || !user.wordpressUrl || !user.wordpressUsername || !user.wordpressPassword) {

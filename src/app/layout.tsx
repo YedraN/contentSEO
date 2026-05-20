@@ -8,10 +8,10 @@ import { Toaster } from "react-hot-toast";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://contentseo.io"),
+  metadataBase: new URL("https://featseo.io"),
   title: {
-    default: "ContentSEO — Generador de Artículos SEO para Agencias",
-    template: "%s | ContentSEO",
+    default: "FeatSEO — Generador de Artículos SEO para Agencias",
+    template: "%s | FeatSEO",
   },
   description:
     "Genera 150+ artículos SEO al mes para los clientes de tu agencia. White-label, WordPress en 1 clic, 97% menos coste que un redactor. Prueba gratis.",
@@ -22,9 +22,9 @@ export const metadata: Metadata = {
     "WordPress IA",
     "redactor IA agencia",
   ],
-  authors: [{ name: "ContentSEO", url: "https://contentseo.io" }],
-  creator: "ContentSEO",
-  publisher: "ContentSEO",
+  authors: [{ name: "FeatSEO", url: "https://featseo.io" }],
+  creator: "FeatSEO",
+  publisher: "FeatSEO",
   robots: {
     index: true,
     follow: true,
@@ -39,28 +39,28 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_ES",
-    url: "https://contentseo.io",
-    title: "ContentSEO — Generador de Artículos SEO para Agencias",
+    url: "https://featseo.io",
+    title: "FeatSEO — Generador de Artículos SEO para Agencias",
     description:
       "Genera 150+ artículos SEO al mes. White-label, WordPress 1-click, 97% menos coste.",
-    siteName: "ContentSEO",
+    siteName: "FeatSEO",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "ContentSEO - Generador de artículos SEO",
+        alt: "FeatSEO - Generador de artículos SEO",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ContentSEO — Generador de Artículos SEO",
+    title: "FeatSEO — Generador de Artículos SEO",
     description: "Genera artículos SEO optimizados en minutos con IA.",
     images: ["/og-image.png"],
   },
   alternates: {
-    canonical: "https://contentseo.io",
+    canonical: "https://featseo.io",
   },
   icons: {
     icon: "/favicon.ico",

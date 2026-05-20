@@ -42,6 +42,10 @@ export default function LoginPage() {
         return;
       }
 
+      if (data.data?.name) {
+        localStorage.setItem("userName", data.data.name);
+        localStorage.setItem("isLoggedIn", "true");
+      }
       toast.success("Bienvenido de nuevo");
       router.push("/dashboard");
     } catch {
@@ -61,7 +65,7 @@ export default function LoginPage() {
             <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">S</span>
             </div>
-            <span className="font-bold text-gray-900">ContentSEO</span>
+            <span className="font-bold text-gray-900">FeatSEO</span>
           </Link>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
             Bienvenido de nuevo

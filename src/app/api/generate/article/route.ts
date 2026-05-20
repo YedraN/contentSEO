@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken, getUserById, deductCredits } from "@/lib/auth";
+import { verifyToken, getUserById, checkAndIncrementUsage } from "@/lib/auth";
 import { generateMultipleArticles } from "@/lib/claude";
 import { prisma } from "@/lib/db";
 import { GenerateArticleRequest } from "@/types";
@@ -59,12 +59,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (user.credits < numArticles) {
+    const usageCheck = await checkAndIncrementUsage(decoded.userId, numArticles);
+    if (!usageCheck.success) {
       return NextResponse.json(
-        {
-          success: false,
-          error: `Créditos insuficientes. Necesitas ${numArticles}, tienes ${user.credits}`,
-        },
+        { success: false, error: usageCheck.error },
         { status: 400 }
       );
     }
@@ -97,15 +95,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const creditsDeducted = await deductCredits(decoded.userId, articles.length);
-
-    if (!creditsDeducted) {
-      return NextResponse.json(
-        { success: false, error: "Error deduciendo créditos" },
-        { status: 500 }
-      );
-    }
-
     const savedArticles = await Promise.all(
       articles.map((article) =>
         prisma.article.create({
@@ -124,13 +113,20 @@ export async function POST(request: NextRequest) {
       )
     );
 
+    let remaining: number;
+    if (user.subscriptionStatus === "active") {
+      remaining = user.articlesLimitPerMonth - ((user.articlesUsedThisMonth || 0) + articles.length);
+    } else {
+      remaining = user.credits - articles.length;
+    }
+
     return NextResponse.json(
       {
         success: true,
         data: {
           articles: savedArticles,
-          creditsUsed: articles.length,
-          creditsRemaining: user.credits - articles.length,
+          articlesUsed: articles.length,
+          articlesRemaining: remaining,
         },
       },
       { status: 201 }

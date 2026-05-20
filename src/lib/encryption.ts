@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || "contentSEO_default_key_change_in_prod";
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || "featseo_default_key_change_in_prod";
 const ALGORITHM = "aes-256-cbc";
 
 function getKeyAndIv() {

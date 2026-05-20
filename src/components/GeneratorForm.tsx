@@ -62,7 +62,7 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
 
   useEffect(() => {
     try {
-      const prefs = localStorage.getItem("contentSEO_prefs");
+      const prefs = localStorage.getItem("featseo_prefs");
       if (prefs) {
         const parsed = JSON.parse(prefs);
         setFormData((prev) => ({

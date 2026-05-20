@@ -140,6 +140,11 @@ export async function getUserById(userId: string) {
       name: true,
       credits: true,
       createdAt: true,
+      subscriptionPlan: true,
+      subscriptionStatus: true,
+      articlesLimitPerMonth: true,
+      articlesUsedThisMonth: true,
+      billingCycleEnd: true,
     },
   });
 }
@@ -188,5 +193,69 @@ export async function deductCredits(
     return true;
   } catch (error) {
     return false;
+  }
+}
+
+export async function checkAndIncrementUsage(
+  userId: string,
+  articlesToGenerate: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        subscriptionStatus: true,
+        articlesUsedThisMonth: true,
+        articlesLimitPerMonth: true,
+        credits: true,
+      },
+    });
+
+    if (!user) {
+      return { success: false, error: "Usuario no encontrado" };
+    }
+
+    // If user has active subscription: use monthly limits
+    if (user.subscriptionStatus === "active") {
+      const remainingArticles = user.articlesLimitPerMonth - (user.articlesUsedThisMonth || 0);
+      if (remainingArticles < articlesToGenerate) {
+        return {
+          success: false,
+          error: `Límite mensual alcanzado. Dispones de ${remainingArticles} artículos más este mes.`,
+        };
+      }
+
+      // Increment usage
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          articlesUsedThisMonth: {
+            increment: articlesToGenerate,
+          },
+        },
+      });
+
+      return { success: true };
+    }
+
+    // Otherwise fall back to old credits system (trial users)
+    if ((user.credits || 0) < articlesToGenerate) {
+      return { success: false, error: "Créditos insuficientes" };
+    }
+
+    // Deduct from credits
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        credits: {
+          decrement: articlesToGenerate,
+        },
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error checking article usage:", error);
+    return { success: false, error: "Error procesando solicitud" };
   }
 }

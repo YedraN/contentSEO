@@ -7,6 +7,7 @@ import { COMPANY_TYPES, LANGUAGE_OPTIONS, CONTENT_TONE_OPTIONS } from "@/lib/pro
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { hasFeature } from "@/lib/plans";
 
 function SectionIcon({ path, color }: { path: string; color: string }) {
   return (
@@ -21,6 +22,9 @@ function SectionIcon({ path, color }: { path: string; color: string }) {
 export default function SettingsPage() {
   const router = useRouter();
   const [credits, setCredits] = useState<number | null>(null);
+  const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
+  const [articlesLimitPerMonth, setArticlesLimitPerMonth] = useState<number | null>(null);
+  const [articlesUsedThisMonth, setArticlesUsedThisMonth] = useState<number | null>(null);
 
   const [name, setName] = useState("");
   const [agencyName, setAgencyName] = useState("");
@@ -46,17 +50,22 @@ export default function SettingsPage() {
   useEffect(() => {
     fetch("/api/credits/check")
       .then((r) => r.json())
-      .then((d) => { if (d.data?.credits !== undefined) setCredits(d.data.credits); })
+      .then((d) => {
+        if (d.data?.credits !== undefined) setCredits(d.data.credits);
+        if (d.data?.subscriptionPlan) setSubscriptionPlan(d.data.subscriptionPlan);
+        if (d.data?.articlesLimitPerMonth !== undefined) setArticlesLimitPerMonth(d.data.articlesLimitPerMonth);
+        if (d.data?.articlesUsedThisMonth !== undefined) setArticlesUsedThisMonth(d.data.articlesUsedThisMonth);
+      })
       .catch(() => {});
 
     try {
-      const prefs = localStorage.getItem("contentSEO_prefs");
+      const prefs = localStorage.getItem("featseo_prefs");
       if (prefs) {
         const p = JSON.parse(prefs);
         if (p.defaultLanguage) setDefaultLanguage(p.defaultLanguage);
         if (p.defaultTone) setDefaultTone(p.defaultTone);
       }
-      const profile = localStorage.getItem("contentSEO_profile");
+      const profile = localStorage.getItem("featseo_profile");
       if (profile) {
         const p = JSON.parse(profile);
         if (p.name) setName(p.name);
@@ -79,7 +88,7 @@ export default function SettingsPage() {
     e.preventDefault();
     setSavingProfile(true);
     await new Promise((r) => setTimeout(r, 600));
-    localStorage.setItem("contentSEO_profile", JSON.stringify({ name, agencyName }));
+    localStorage.setItem("featseo_profile", JSON.stringify({ name, agencyName }));
     toast.success("Perfil actualizado");
     setSavingProfile(false);
   };
@@ -88,7 +97,7 @@ export default function SettingsPage() {
     e.preventDefault();
     setSavingPrefs(true);
     await new Promise((r) => setTimeout(r, 400));
-    localStorage.setItem("contentSEO_prefs", JSON.stringify({ defaultLanguage, defaultTone }));
+    localStorage.setItem("featseo_prefs", JSON.stringify({ defaultLanguage, defaultTone }));
     toast.success("Preferencias guardadas");
     setSavingPrefs(false);
   };
@@ -267,7 +276,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Clientes */}
-        <ClientsSection />
+        <ClientsSection subscriptionPlan={subscriptionPlan} />
 
         {/* Preferencias */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -397,6 +406,7 @@ export default function SettingsPage() {
         </div>
 
         {/* WordPress section */}
+        {hasFeature(subscriptionPlan, "wordpress") ? (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
@@ -464,6 +474,31 @@ export default function SettingsPage() {
             </form>
           )}
         </div>
+        ) : (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+              {SECTION_ICON("M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z")}
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-gray-900">Integración WordPress</h2>
+              <p className="text-xs text-gray-500">Publica artículos directamente en tu web</p>
+            </div>
+          </div>
+
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <p className="text-sm font-semibold text-amber-900 mb-2">Disponible en plan Pro o Agency</p>
+            <p className="text-xs text-amber-700 mb-3">
+              Sube de plan para conectar tu WordPress y publicar artículos con un clic desde ContentSEO.
+            </p>
+            <Link href="/credits">
+              <button className="text-xs font-semibold text-amber-700 hover:text-amber-800 underline">
+                Ver planes de pago →
+              </button>
+            </Link>
+          </div>
+        </div>
+        )}
 
         {/* Cerrar sesión */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -720,7 +755,7 @@ interface ClientItem {
   createdAt: string;
 }
 
-function ClientsSection() {
+function ClientsSection({ subscriptionPlan }: { subscriptionPlan: string | null }) {
   const [clients, setClients] = useState<ClientItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<ClientItem | null>(null);
@@ -810,7 +845,19 @@ function ClientsSection() {
         </div>
       </div>
 
-      {loading ? (
+      {!hasFeature(subscriptionPlan, "multiClient") ? (
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+          <p className="text-sm font-semibold text-amber-900 mb-2">Disponible en plan Pro o Agency</p>
+          <p className="text-xs text-amber-700 mb-3">
+            Sube de plan para gestionar múltiples clientes y generar artículos personalizados para cada uno.
+          </p>
+          <Link href="/credits">
+            <button className="text-xs font-semibold text-amber-700 hover:text-amber-800 underline">
+              Ver planes de pago →
+            </button>
+          </Link>
+        </div>
+      ) : loading ? (
         <p className="text-sm text-gray-400">Cargando clientes...</p>
       ) : (
         <div className="space-y-3">

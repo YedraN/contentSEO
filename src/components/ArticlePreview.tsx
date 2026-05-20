@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Button from "@/components/ui/Button";
 import toast from "react-hot-toast";
 import { classNames } from "@/lib/utils";
+import { hasFeature } from "@/lib/plans";
 
 interface ArticlePreviewProps {
   article: {
@@ -23,6 +24,7 @@ export default function ArticlePreview({ article }: ArticlePreviewProps) {
   const [showContent, setShowContent] = useState(false);
   const [format, setFormat] = useState<"markdown" | "html" | "docx">("markdown");
   const [wpConnected, setWpConnected] = useState(false);
+  const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
   const [showWpModal, setShowWpModal] = useState(false);
   const [wpStatus, setWpStatus] = useState("draft");
   const [isPublishing, setIsPublishing] = useState(false);
@@ -41,9 +43,16 @@ export default function ArticlePreview({ article }: ArticlePreviewProps) {
   }, [isEditing]);
 
   useEffect(() => {
-    fetch("/api/wordpress/credentials")
-      .then((r) => r.json())
-      .then((d) => setWpConnected(d.data?.connected ?? false))
+    Promise.all([
+      fetch("/api/wordpress/credentials").then((r) => r.json()),
+      fetch("/api/credits/check").then((r) => r.json()),
+    ])
+      .then(([wpData, creditsData]) => {
+        setWpConnected(wpData.data?.connected ?? false);
+        if (creditsData.data?.subscriptionPlan) {
+          setSubscriptionPlan(creditsData.data.subscriptionPlan);
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -240,7 +249,7 @@ export default function ArticlePreview({ article }: ArticlePreviewProps) {
               <Button variant="outline" onClick={handleEdit}>
                 Editar
               </Button>
-              {wpConnected && (
+              {wpConnected && hasFeature(subscriptionPlan, "wordpress") && (
                 <Button variant="ghost" onClick={() => setShowWpModal(true)}>
                   WordPress
                 </Button>

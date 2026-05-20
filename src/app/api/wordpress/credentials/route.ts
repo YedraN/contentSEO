@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
+import { verifyToken, getUserById } from "@/lib/auth";
 import { encrypt, decrypt } from "@/lib/encryption";
 import { testWordPressConnection } from "@/lib/wordpress";
 import { prisma } from "@/lib/db";
+import { hasFeature } from "@/lib/plans";
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,6 +23,14 @@ export async function POST(request: NextRequest) {
     const { wordpressUrl, wordpressUsername, wordpressPassword, action } = body;
 
     if (action === "test") {
+      const user = await getUserById(decoded.userId);
+      if (!user || !hasFeature(user.subscriptionPlan, "wordpress")) {
+        return NextResponse.json(
+          { success: false, error: "Esta feature requiere el plan Pro o Agency" },
+          { status: 403 }
+        );
+      }
+
       const isConnected = await testWordPressConnection({
         url: wordpressUrl,
         username: wordpressUsername,
@@ -39,6 +48,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "save") {
+      const user = await getUserById(decoded.userId);
+      if (!user || !hasFeature(user.subscriptionPlan, "wordpress")) {
+        return NextResponse.json(
+          { success: false, error: "Esta feature requiere el plan Pro o Agency" },
+          { status: 403 }
+        );
+      }
+
       if (!wordpressUrl || !wordpressUsername || !wordpressPassword) {
         return NextResponse.json(
           { success: false, error: "Faltan datos requeridos" },

@@ -10,18 +10,18 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2.5 mb-4">
               <div className="w-9 h-9 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shadow-lg shadow-brand-600/20">
-                <span className="text-white font-bold text-lg">S</span>
+                <span className="text-white font-bold text-lg">F</span>
               </div>
-              <span className="text-xl font-bold text-white">ContentSEO</span>
+              <span className="text-xl font-bold text-white">FeatSEO</span>
             </Link>
             <p className="text-sm leading-relaxed mb-6">
               La plataforma de contenido SEO white-label para agencias de marketing que quieren escalar sin contratar redactores.
             </p>
             <a
-              href="mailto:hola@contentseo.io"
+              href="mailto:hola@featseo.io"
               className="text-sm text-brand-400 hover:text-brand-300 transition-colors font-medium"
             >
-              hola@contentseo.io
+              hola@featseo.io
             </a>
           </div>
 
@@ -41,7 +41,7 @@ export default function Footer() {
               <li><Link href="/#pricing" className="text-sm hover:text-white transition-colors">White-label</Link></li>
               <li><Link href="/#pricing" className="text-sm hover:text-white transition-colors">Plan Enterprise</Link></li>
               <li>
-                <a href="mailto:hola@contentseo.io" className="text-sm hover:text-white transition-colors">
+                <a href="mailto:hola@featseo.io" className="text-sm hover:text-white transition-colors">
                   Hablar con ventas
                 </a>
               </li>
@@ -60,7 +60,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 py-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm">
-          <p>&copy; {currentYear} ContentSEO. Todos los derechos reservados.</p>
+          <p>&copy; {currentYear} FeatSEO. Todos los derechos reservados.</p>
           <div className="flex gap-6">
             <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
               LinkedIn
