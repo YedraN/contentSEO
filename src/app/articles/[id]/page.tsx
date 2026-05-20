@@ -1,0 +1,73 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import ArticlePreview from "@/components/ArticlePreview";
+import { useAuthStore } from "@/lib/store";
+import toast from "react-hot-toast";
+
+export default function ArticlePage() {
+  const params = useParams();
+  const router = useRouter();
+  const [article, setArticle] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+
+    const fetchArticle = async () => {
+      try {
+        const res = await fetch(`/api/articles/${params.id}`);
+        if (!res.ok) {
+          toast.error("Artículo no encontrado");
+          router.push("/history");
+          return;
+        }
+        const data = await res.json();
+        if (data.success) {
+          setArticle(data.data);
+        } else {
+          toast.error("Error cargando artículo");
+          router.push("/history");
+        }
+      } catch {
+        toast.error("Error cargando artículo");
+        router.push("/history");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchArticle();
+  }, [params.id, isAuthenticated, router]);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 animate-pulse space-y-4">
+          <div className="h-8 bg-gray-100 rounded w-3/4" />
+          <div className="h-4 bg-gray-100 rounded w-full" />
+          <div className="h-4 bg-gray-100 rounded w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!article) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">Artículo no encontrado</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      <ArticlePreview article={article} />
+    </div>
+  );
+}
