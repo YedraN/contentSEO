@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -15,9 +16,20 @@ model User {
   email         String          @unique
   password      String
   name          String?
+  agencyName    String?
   credits       Int             @default(0)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
+
+  // Subscription model (Stripe)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  subscriptionStatus   String?         // "active" | "canceled" | "past_due" | "incomplete" | null
+  subscriptionPlan     String?         // "starter" | "pro" | "agency" | null
+  articlesLimitPerMonth Int           @default(0)
+  articlesUsedThisMonth Int           @default(0)
+  billingCycleStart    DateTime?
+  billingCycleEnd      DateTime?
 
   wordpressUrl         String?
   wordpressUsername    String?

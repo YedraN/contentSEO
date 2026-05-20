@@ -38,7 +38,8 @@ export async function verifyToken(
 export async function registerUser(
   email: string,
   password: string,
-  name: string
+  name: string,
+  agencyName?: string
 ): Promise<{ success: boolean; user?: any; error?: string }> {
   // Validar email
   if (!validateEmail(email)) {
@@ -70,6 +71,7 @@ export async function registerUser(
         email,
         password: hashedPassword,
         name,
+        agencyName: agencyName || null,
         credits: 1, // 1 crédito de prueba
       },
     });
@@ -80,6 +82,7 @@ export async function registerUser(
         id: user.id,
         email: user.email,
         name: user.name,
+        agencyName: user.agencyName,
         credits: user.credits,
       },
     };

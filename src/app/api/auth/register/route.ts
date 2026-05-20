@@ -3,7 +3,7 @@ import { registerUser, createToken } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, name } = await request.json();
+    const { email, password, name, agencyName } = await request.json();
 
     if (!email || !password || !name) {
       return NextResponse.json(
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await registerUser(email, password, name);
+    const result = await registerUser(email, password, name, agencyName);
 
     if (!result.success) {
       return NextResponse.json(

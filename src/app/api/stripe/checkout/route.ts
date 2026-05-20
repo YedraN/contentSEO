@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth";
-import { createCheckoutSession, STRIPE_PRODUCTS } from "@/lib/stripe";
+import { createCheckoutSession, SUBSCRIPTION_PLANS } from "@/lib/stripe";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!plan || !Object.keys(STRIPE_PRODUCTS).includes(plan)) {
+    if (!plan || !Object.keys(SUBSCRIPTION_PLANS).includes(plan)) {
       return NextResponse.json(
         { success: false, error: "Plan inválido" },
         { status: 400 }

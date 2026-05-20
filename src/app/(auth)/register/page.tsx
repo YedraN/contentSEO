@@ -52,6 +52,7 @@ export default function RegisterPage() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          agencyName: formData.agencyName,
         }),
       });
 
@@ -62,9 +63,6 @@ export default function RegisterPage() {
         return;
       }
 
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userName", formData.name);
-      localStorage.setItem("agencyName", formData.agencyName);
       toast.success("¡Cuenta creada! Bienvenido a ContentSEO");
       router.push("/dashboard");
     } catch {

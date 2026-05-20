@@ -19,7 +19,8 @@
       "Bash(npx next *)",
       "Bash(start npx *)",
       "PowerShell(cd \"C:\\\\Users\\\\FDCV\\\\Documents\\\\contentSEO\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"npx next dev --port 3000\")",
-      "PowerShell($env:DATABASE_URL)"
+      "PowerShell($env:DATABASE_URL)",
+      "Skill(supabase)"
     ]
   }
 }

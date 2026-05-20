@@ -42,10 +42,6 @@ export default function LoginPage() {
         return;
       }
 
-      if (data.data?.name) {
-        localStorage.setItem("userName", data.data.name);
-        localStorage.setItem("isLoggedIn", "true");
-      }
       toast.success("Bienvenido de nuevo");
       router.push("/dashboard");
     } catch {
