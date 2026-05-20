@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
       name: "token",
       value: "",
       httpOnly: true,
+      path: "/",
       maxAge: 0,
     });
 
