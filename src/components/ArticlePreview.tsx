@@ -11,7 +11,7 @@ interface ArticlePreviewProps {
     id: string;
     title: string;
     content: string;
-    keywords: string[];
+    keywords: string[] | string;
     metaDescription?: string;
     readingTime?: number;
   };
@@ -162,7 +162,7 @@ export default function ArticlePreview({ article }: ArticlePreviewProps) {
               </p>
             )}
             <div className="flex flex-wrap gap-2 mb-3">
-              {article.keywords?.map((keyword) => (
+              {(typeof article.keywords === 'string' ? JSON.parse(article.keywords) : article.keywords)?.map((keyword: string) => (
                 <span key={keyword} className="bg-brand-50 text-brand-700 text-xs font-medium px-2.5 py-1 rounded-lg">
                   {keyword}
                 </span>
