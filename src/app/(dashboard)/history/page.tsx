@@ -208,16 +208,23 @@ export default function HistoryPage() {
                       )}
                     </div>
                     <div className="flex flex-wrap gap-1.5 mt-2">
-                      {article.keywords.slice(0, 3).map((kw, i) => (
-                        <span key={i} className="text-xs bg-brand-50 text-brand-600 px-2 py-0.5 rounded-full font-medium">
-                          {kw}
-                        </span>
-                      ))}
-                      {article.keywords.length > 3 && (
-                        <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">
-                          +{article.keywords.length - 3}
-                        </span>
-                      )}
+                      {(() => {
+                        const kws = typeof article.keywords === 'string' ? JSON.parse(article.keywords) : article.keywords;
+                        return (
+                          <>
+                            {kws.slice(0, 3).map((kw: string, i: number) => (
+                              <span key={i} className="text-xs bg-brand-50 text-brand-600 px-2 py-0.5 rounded-full font-medium">
+                                {kw}
+                              </span>
+                            ))}
+                            {kws.length > 3 && (
+                              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">
+                                +{kws.length - 3}
+                              </span>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
 
