@@ -22,7 +22,10 @@ export async function middleware(request: NextRequest) {
 
   if (publicRoutes.some((route) => pathname.startsWith(route))) {
     if (token && (pathname === "/login" || pathname === "/register")) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      const decoded = await verifyToken(token);
+      if (decoded) {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
     }
     return NextResponse.next();
   }

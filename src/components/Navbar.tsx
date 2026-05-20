@@ -27,9 +27,12 @@ export default function Navbar() {
       try {
         const response = await fetch("/api/credits/check");
         if (response.ok) {
+          const data = await response.json();
+          const name = data.data?.name || localStorage.getItem("userName") || "";
           setIsAuthenticated(true);
-          const name = localStorage.getItem("userName");
-          if (name) setUserName(name);
+          setUserName(name);
+          localStorage.setItem("isLoggedIn", "true");
+          if (name) localStorage.setItem("userName", name);
         } else {
           setIsAuthenticated(false);
           localStorage.removeItem("isLoggedIn");

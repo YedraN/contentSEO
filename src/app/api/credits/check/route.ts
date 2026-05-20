@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
         success: true,
         data: {
           credits: user.credits,
+          name: user.name,
         },
       },
       { status: 200 }
