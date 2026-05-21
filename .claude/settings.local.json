@@ -37,7 +37,8 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
-      "Bash(git commit -m 'Add export const dynamic = '\\\\''force-dynamic'\\\\'' to missing API routes and landing page *)"
+      "Bash(git commit -m 'Add export const dynamic = '\\\\''force-dynamic'\\\\'' to missing API routes and landing page *)",
+      "Bash(git commit -m 'Fix dashboard page Server/Client component separation *)"
     ]
   }
 }
