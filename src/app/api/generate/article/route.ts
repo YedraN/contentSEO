@@ -5,6 +5,8 @@ import { prisma } from "@/lib/db";
 import { GenerateArticleRequest } from "@/types";
 import { getAuthenticatedUser } from "@/lib/api-auth";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const auth = await getAuthenticatedUser(request);

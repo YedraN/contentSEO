@@ -28,7 +28,14 @@
       "WebFetch(domain:agencyanalytics.com)",
       "WebFetch(domain:mavance.es)",
       "WebFetch(domain:dinorank.com)",
-      "Bash(Get-ChildItem C:\\\\Users\\\\FDCV\\\\Documents\\\\contentSEO\\\\src\\\\app\\\\\\(dashboard\\) *)"
+      "Bash(Get-ChildItem C:\\\\Users\\\\FDCV\\\\Documents\\\\contentSEO\\\\src\\\\app\\\\\\(dashboard\\) *)",
+      "Bash(cat)",
+      "Bash(chmod +x /tmp/add_dynamic.sh)",
+      "Bash(/tmp/add_dynamic.sh)",
+      "Bash(git checkout *)",
+      "Bash(python /tmp/fix_dynamic.py)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

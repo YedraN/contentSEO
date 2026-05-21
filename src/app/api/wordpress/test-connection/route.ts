@@ -4,6 +4,8 @@ import { decrypt } from "@/lib/encryption";
 import { prisma } from "@/lib/db";
 import { verifyAuth } from "@/lib/api-auth";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const userId = await verifyAuth(request);

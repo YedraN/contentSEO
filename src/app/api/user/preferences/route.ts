@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthenticatedUser } from "@/lib/api-auth";
 
+export const dynamic = 'force-dynamic';
+
 const VALID_LANGUAGES = ["es", "en", "fr", "de", "it", "pt", "nl", "pl"];
 const VALID_TONES = ["professional", "casual", "technical", "creative", "persuasive"];
 

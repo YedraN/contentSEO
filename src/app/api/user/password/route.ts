@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { comparePasswords, hashPassword } from "@/lib/auth";
 import { verifyAuth } from "@/lib/api-auth";
 
+export const dynamic = 'force-dynamic';
+
 export async function PATCH(request: NextRequest) {
   try {
     const userId = await verifyAuth(request);

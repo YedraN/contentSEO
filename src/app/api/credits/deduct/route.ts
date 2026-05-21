@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { deductCredits } from "@/lib/auth";
 import { verifyAuth } from "@/lib/api-auth";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const userId = await verifyAuth(request);

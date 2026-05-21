@@ -5,6 +5,8 @@ import { prisma } from "@/lib/db";
 import { hasFeature } from "@/lib/plans";
 import { verifyAuth } from "@/lib/api-auth";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
