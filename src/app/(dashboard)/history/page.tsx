@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { parseKeywords } from "@/lib/utils";
 
 interface ClientInfo {
   id: string;
@@ -209,7 +210,7 @@ export default function HistoryPage() {
                     </div>
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {(() => {
-                        const kws = typeof article.keywords === 'string' ? JSON.parse(article.keywords) : article.keywords;
+                        const kws = parseKeywords(article.keywords);
                         return (
                           <>
                             {kws.slice(0, 3).map((kw: string, i: number) => (

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
+import { parseKeywords } from "@/lib/utils";
 
 interface Article {
   id: string;
@@ -158,7 +159,7 @@ export default function DashboardPage() {
                     <span className="text-xs text-gray-400">
                       {new Date(article.createdAt).toLocaleDateString("es-ES", { day: "numeric", month: "short" })}
                     </span>
-                    {(typeof article.keywords === 'string' ? JSON.parse(article.keywords) : article.keywords)?.slice(0, 2).map((kw: string, i: number) => (
+                    {parseKeywords(article.keywords)?.slice(0, 2).map((kw: string, i: number) => (
                       <span key={i} className="text-xs bg-brand-50 text-brand-600 px-2 py-0.5 rounded-full font-medium">
                         {kw}
                       </span>

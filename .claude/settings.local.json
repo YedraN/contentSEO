@@ -21,7 +21,13 @@
       "PowerShell(cd \"C:\\\\Users\\\\FDCV\\\\Documents\\\\contentSEO\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"npx next dev --port 3000\")",
       "PowerShell($env:DATABASE_URL)",
       "Skill(supabase)",
-      "mcp__plugin_supabase_supabase__get_project"
+      "mcp__plugin_supabase_supabase__get_project",
+      "WebSearch",
+      "WebFetch(domain:softailed.com)",
+      "Bash(dir \"C:\\\\Users\\\\FDCV\\\\Documents\\\\contentSEO\\\\src\" /s /b)",
+      "WebFetch(domain:agencyanalytics.com)",
+      "WebFetch(domain:mavance.es)",
+      "WebFetch(domain:dinorank.com)"
     ]
   }
 }

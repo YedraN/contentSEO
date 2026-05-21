@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ArticlePreview from "@/components/ArticlePreview";
-import { useAuthStore } from "@/lib/store";
 import toast from "react-hot-toast";
 
 export default function ArticlePage() {
@@ -11,14 +10,8 @@ export default function ArticlePage() {
   const router = useRouter();
   const [article, setArticle] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login");
-      return;
-    }
-
     const fetchArticle = async () => {
       try {
         const res = await fetch(`/api/articles/${params.id}`);
@@ -43,7 +36,7 @@ export default function ArticlePage() {
     };
 
     fetchArticle();
-  }, [params.id, isAuthenticated, router]);
+  }, [params.id, router]);
 
   if (isLoading) {
     return (

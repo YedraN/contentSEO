@@ -1,31 +1,42 @@
 import Stripe from "stripe";
+import { PLANS } from "./plans";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
+export function verifyWebhookSignature(body: string, signature: string): Stripe.Event | null {
+  try {
+    const secret = process.env.STRIPE_WEBHOOK_SECRET || "";
+    return stripe.webhooks.constructEvent(body, signature, secret) as Stripe.Event;
+  } catch (error) {
+    console.error("Error verificando webhook:", error);
+    return null;
+  }
+}
+
 export const SUBSCRIPTION_PLANS = {
   starter: {
-    priceId: process.env.STRIPE_PRICE_STARTER_ID || "",
-    name: "Starter",
-    articles: 20,
-    price: 4900, // $49/mes en centavos
-    priceUSD: 49,
-    description: "20 artículos por mes",
+    priceId: PLANS.starter.priceId,
+    name: PLANS.starter.name,
+    articles: PLANS.starter.articles,
+    price: Math.round(PLANS.starter.priceUSD * 100),
+    priceUSD: PLANS.starter.priceUSD,
+    description: `${PLANS.starter.articles} artículos por mes`,
   },
   pro: {
-    priceId: process.env.STRIPE_PRICE_PRO_ID || "",
-    name: "Pro",
-    articles: 80,
-    price: 14900, // $149/mes
-    priceUSD: 149,
-    description: "80 artículos por mes",
+    priceId: PLANS.pro.priceId,
+    name: PLANS.pro.name,
+    articles: PLANS.pro.articles,
+    price: Math.round(PLANS.pro.priceUSD * 100),
+    priceUSD: PLANS.pro.priceUSD,
+    description: `${PLANS.pro.articles} artículos por mes`,
   },
   agency: {
-    priceId: process.env.STRIPE_PRICE_AGENCY_ID || "",
-    name: "Agency",
-    articles: 250,
-    price: 39900, // $399/mes
-    priceUSD: 399,
-    description: "250 artículos por mes",
+    priceId: PLANS.agency.priceId,
+    name: PLANS.agency.name,
+    articles: PLANS.agency.articles,
+    price: Math.round(PLANS.agency.priceUSD * 100),
+    priceUSD: PLANS.agency.priceUSD,
+    description: `${PLANS.agency.articles} artículos por mes`,
   },
 };
 
@@ -103,8 +114,8 @@ export async function handleSubscriptionCreated(
       plan,
     };
   } catch (error) {
-    console.error("Error procesando subscripción creada:", error);
-    return { success: false, error: "Error procesando subscripción" };
+    console.error("Error manejando suscripción creada:", error);
+    return { success: false, error: "Error procesando suscripción" };
   }
 }
 
@@ -113,41 +124,31 @@ export async function handleSubscriptionUpdated(
 ): Promise<{
   success: boolean;
   userId?: string;
-  status?: string;
   error?: string;
 }> {
   try {
     const userId = subscription.metadata?.userId;
-    const status = subscription.status;
+    const plan = subscription.metadata?.plan;
 
-    if (!userId) {
-      return { success: false, error: "Usuario no encontrado en metadata" };
+    if (!userId || !plan) {
+      return { success: false, error: "Metadata inválida" };
     }
 
-    return {
-      success: true,
-      userId,
-      status,
-    };
+    return { success: true, userId };
   } catch (error) {
-    console.error("Error procesando actualización de subscripción:", error);
-    return { success: false, error: "Error procesando actualización" };
+    console.error("Error manejando suscripción actualizada:", error);
+    return { success: false, error: "Error procesando suscripción" };
   }
 }
 
-export function verifyWebhookSignature(
-  body: string,
-  signature: string
-): Stripe.Event | null {
+export async function handleSubscriptionDeleted(
+  subscription: Stripe.Subscription
+): Promise<boolean> {
   try {
-    const event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
-    return event;
+    const userId = subscription.metadata?.userId;
+    return !!userId;
   } catch (error) {
-    console.error("Error verificando firma de webhook:", error);
-    return null;
+    console.error("Error manejando suscripción cancelada:", error);
+    return false;
   }
 }

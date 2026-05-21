@@ -76,3 +76,12 @@ export function truncate(text: string, length: number): string {
 export function stripHtmlTags(html: string): string {
   return html.replace(/<[^>]*>/g, "");
 }
+
+export function parseKeywords(raw: string | string[]): string[] {
+  if (Array.isArray(raw)) return raw;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return [raw];
+  }
+}

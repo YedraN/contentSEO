@@ -4,14 +4,14 @@ import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
 import { classNames } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { PLANS } from "@/lib/plans";
 
+// Display plans with formatted features
 const SUBSCRIPTION_PLANS = [
   {
     id: "starter",
-    name: "Starter",
-    price: 49,
-    articles: 20,
-    description: "Perfecto para freelancers",
+    ...PLANS.starter,
+    price: PLANS.starter.priceUSD,
     popular: false,
     features: [
       "20 artículos al mes",
@@ -22,10 +22,8 @@ const SUBSCRIPTION_PLANS = [
   },
   {
     id: "pro",
-    name: "Pro",
-    price: 149,
-    articles: 80,
-    description: "La opción más elegida",
+    ...PLANS.pro,
+    price: PLANS.pro.priceUSD,
     popular: true,
     features: [
       "80 artículos al mes",
@@ -38,10 +36,8 @@ const SUBSCRIPTION_PLANS = [
   },
   {
     id: "agency",
-    name: "Agency",
-    price: 399,
-    articles: 250,
-    description: "Para grandes volúmenes",
+    ...PLANS.agency,
+    price: PLANS.agency.priceUSD,
     popular: false,
     features: [
       "250 artículos al mes",

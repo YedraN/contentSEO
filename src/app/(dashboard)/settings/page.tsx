@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { hasFeature } from "@/lib/plans";
+import { useAuth } from "@/contexts/AuthContext";
 
 function SectionIcon({ path, color }: { path: string; color: string }) {
   return (
@@ -21,11 +22,7 @@ function SectionIcon({ path, color }: { path: string; color: string }) {
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [credits, setCredits] = useState<number | null>(null);
-  const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
-  const [articlesLimitPerMonth, setArticlesLimitPerMonth] = useState<number | null>(null);
-  const [articlesUsedThisMonth, setArticlesUsedThisMonth] = useState<number | null>(null);
-
+  const { user, isLoading, logout } = useAuth();
   const [name, setName] = useState("");
   const [agencyName, setAgencyName] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
@@ -48,30 +45,11 @@ export default function SettingsPage() {
   const [testingWp, setTestingWp] = useState(false);
 
   useEffect(() => {
-    fetch("/api/credits/check")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.data?.credits !== undefined) setCredits(d.data.credits);
-        if (d.data?.subscriptionPlan) setSubscriptionPlan(d.data.subscriptionPlan);
-        if (d.data?.articlesLimitPerMonth !== undefined) setArticlesLimitPerMonth(d.data.articlesLimitPerMonth);
-        if (d.data?.articlesUsedThisMonth !== undefined) setArticlesUsedThisMonth(d.data.articlesUsedThisMonth);
-      })
-      .catch(() => {});
-
-    try {
-      const prefs = localStorage.getItem("featseo_prefs");
-      if (prefs) {
-        const p = JSON.parse(prefs);
-        if (p.defaultLanguage) setDefaultLanguage(p.defaultLanguage);
-        if (p.defaultTone) setDefaultTone(p.defaultTone);
-      }
-      const profile = localStorage.getItem("featseo_profile");
-      if (profile) {
-        const p = JSON.parse(profile);
-        if (p.name) setName(p.name);
-        if (p.agencyName) setAgencyName(p.agencyName);
-      }
-    } catch {}
+    if (user && !isLoading) {
+      setName(user.name || "");
+      setDefaultLanguage(user.defaultLanguage || "es");
+      setDefaultTone(user.defaultTone || "professional");
+    }
 
     fetch("/api/wordpress/credentials")
       .then((r) => r.json())
@@ -82,24 +60,50 @@ export default function SettingsPage() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [user, isLoading]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingProfile(true);
-    await new Promise((r) => setTimeout(r, 600));
-    localStorage.setItem("featseo_profile", JSON.stringify({ name, agencyName }));
-    toast.success("Perfil actualizado");
-    setSavingProfile(false);
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, agencyName }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Perfil actualizado");
+      } else {
+        toast.error(data.error || "Error guardando perfil");
+      }
+    } catch {
+      toast.error("Error guardando perfil");
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
   const handleSavePrefs = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingPrefs(true);
-    await new Promise((r) => setTimeout(r, 400));
-    localStorage.setItem("featseo_prefs", JSON.stringify({ defaultLanguage, defaultTone }));
-    toast.success("Preferencias guardadas");
-    setSavingPrefs(false);
+    try {
+      const res = await fetch("/api/user/preferences", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ defaultLanguage, defaultTone }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Preferencias guardadas");
+      } else {
+        toast.error(data.error || "Error guardando preferencias");
+      }
+    } catch {
+      toast.error("Error guardando preferencias");
+    } finally {
+      setSavingPrefs(false);
+    }
   };
 
   const handleSavePassword = async (e: React.FormEvent) => {
@@ -113,12 +117,26 @@ export default function SettingsPage() {
       return;
     }
     setSavingPassword(true);
-    await new Promise((r) => setTimeout(r, 800));
-    toast.success("Contraseña actualizada");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setSavingPassword(false);
+    try {
+      const res = await fetch("/api/user/password", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Contraseña actualizada");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        toast.error(data.error || "Error actualizando contraseña");
+      }
+    } catch {
+      toast.error("Error actualizando contraseña");
+    } finally {
+      setSavingPassword(false);
+    }
   };
 
   const handleTestWordPress = async () => {
@@ -230,10 +248,10 @@ export default function SettingsPage() {
             {agencyName && (
               <p className="text-sm text-gray-500 truncate">{agencyName}</p>
             )}
-            {credits !== null && (
+            {user?.credits !== undefined && (
               <span className="inline-flex items-center gap-1.5 mt-2 bg-brand-50 text-brand-700 text-xs font-semibold px-2.5 py-1 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-brand-500" />
-                {credits} crédito{credits !== 1 ? "s" : ""} disponible{credits !== 1 ? "s" : ""}
+                {user.credits} crédito{user.credits !== 1 ? "s" : ""} disponible{user.credits !== 1 ? "s" : ""}
               </span>
             )}
           </div>
@@ -276,7 +294,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Clientes */}
-        <ClientsSection subscriptionPlan={subscriptionPlan} />
+        <ClientsSection subscriptionPlan={user?.subscriptionPlan ?? null} />
 
         {/* Preferencias */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -394,7 +412,7 @@ export default function SettingsPage() {
             <div>
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Créditos disponibles</p>
               <p className="text-3xl font-bold text-brand-600 mt-0.5">
-                {credits === null ? "—" : credits}
+                {isLoading || user?.credits === undefined ? "—" : user.credits}
               </p>
             </div>
             <Link href="/credits">
@@ -406,7 +424,7 @@ export default function SettingsPage() {
         </div>
 
         {/* WordPress section */}
-        {hasFeature(subscriptionPlan, "wordpress") ? (
+        {hasFeature(user?.subscriptionPlan ?? null, "wordpress") ? (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
@@ -516,9 +534,7 @@ export default function SettingsPage() {
           <button
             onClick={async () => {
               try {
-                await fetch("/api/auth/logout", { method: "POST" });
-                localStorage.removeItem("isLoggedIn");
-                localStorage.removeItem("userName");
+                await logout();
                 toast.success("Sesión cerrada");
                 router.push("/");
               } catch {

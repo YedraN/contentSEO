@@ -1,22 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken, getUserById } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { hasFeature } from "@/lib/plans";
+import { verifyAuth, getAuthenticatedUser } from "@/lib/api-auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get("token")?.value;
-    if (!token) {
+    const userId = await verifyAuth(request);
+    if (!userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
     }
 
-    const decoded = await verifyToken(token);
-    if (!decoded) {
-      return NextResponse.json({ success: false, error: "Token inválido" }, { status: 401 });
-    }
-
     const clients = await prisma.client.findMany({
-      where: { userId: decoded.userId },
+      where: { userId },
       orderBy: { createdAt: "desc" },
       include: { _count: { select: { articles: true } } },
     });
@@ -42,21 +37,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get("token")?.value;
-    if (!token) {
-      return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
-    }
-
-    const decoded = await verifyToken(token);
-    if (!decoded) {
-      return NextResponse.json({ success: false, error: "Token inválido" }, { status: 401 });
-    }
-
-    const user = await getUserById(decoded.userId);
-    if (!user || !hasFeature(user.subscriptionPlan, "multiClient")) {
+    const auth = await getAuthenticatedUser(request);
+    if (!auth || !hasFeature(auth.user.subscriptionPlan, "multiClient")) {
       return NextResponse.json(
-        { success: false, error: "Esta feature requiere el plan Pro o Agency" },
-        { status: 403 }
+        { success: false, error: auth ? "Esta feature requiere el plan Pro o Agency" : "No autorizado" },
+        { status: auth ? 403 : 401 }
       );
     }
 
@@ -69,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     const client = await prisma.client.create({
       data: {
-        userId: decoded.userId,
+        userId: auth.userId,
         name: name.trim(),
         companyType: companyType || "SaaS",
         defaultTone: defaultTone || "professional",

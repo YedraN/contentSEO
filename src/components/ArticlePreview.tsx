@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Button from "@/components/ui/Button";
 import toast from "react-hot-toast";
-import { classNames } from "@/lib/utils";
+import { classNames, parseKeywords } from "@/lib/utils";
 import { hasFeature } from "@/lib/plans";
 
 interface ArticlePreviewProps {
@@ -162,7 +162,7 @@ export default function ArticlePreview({ article }: ArticlePreviewProps) {
               </p>
             )}
             <div className="flex flex-wrap gap-2 mb-3">
-              {(typeof article.keywords === 'string' ? JSON.parse(article.keywords) : article.keywords)?.map((keyword: string) => (
+              {parseKeywords(article.keywords)?.map((keyword: string) => (
                 <span key={keyword} className="bg-brand-50 text-brand-700 text-xs font-medium px-2.5 py-1 rounded-lg">
                   {keyword}
                 </span>

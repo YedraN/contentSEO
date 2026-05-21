@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
 import { createCheckoutSession, SUBSCRIPTION_PLANS } from "@/lib/stripe";
+import { verifyAuth } from "@/lib/api-auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get("token")?.value;
-    const { plan } = await request.json();
-
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: "No autorizado" },
-        { status: 401 }
-      );
+    const userId = await verifyAuth(request);
+    if (!userId) {
+      return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
     }
+
+    const { plan } = await request.json();
 
     if (!plan || !Object.keys(SUBSCRIPTION_PLANS).includes(plan)) {
       return NextResponse.json(
@@ -21,16 +18,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const decoded = await verifyToken(token);
-
-    if (!decoded) {
-      return NextResponse.json(
-        { success: false, error: "Token inválido" },
-        { status: 401 }
-      );
-    }
-
-    const session = await createCheckoutSession(decoded.userId, plan);
+    const session = await createCheckoutSession(userId, plan);
 
     if (!session) {
       return NextResponse.json(

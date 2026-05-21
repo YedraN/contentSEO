@@ -1,20 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { verifyAuth } from "@/lib/api-auth";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const token = request.cookies.get("token")?.value;
-    if (!token) {
+    const userId = await verifyAuth(request);
+    if (!userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
-    }
-
-    const decoded = await verifyToken(token);
-    if (!decoded) {
-      return NextResponse.json({ success: false, error: "Token inválido" }, { status: 401 });
     }
 
     const client = await prisma.client.findUnique({
@@ -26,7 +21,7 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Cliente no encontrado" }, { status: 404 });
     }
 
-    if (client.userId !== decoded.userId) {
+    if (client.userId !== userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 403 });
     }
 
@@ -48,21 +43,16 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const token = request.cookies.get("token")?.value;
-    if (!token) {
+    const userId = await verifyAuth(request);
+    if (!userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
-    }
-
-    const decoded = await verifyToken(token);
-    if (!decoded) {
-      return NextResponse.json({ success: false, error: "Token inválido" }, { status: 401 });
     }
 
     const existing = await prisma.client.findUnique({ where: { id: params.id } });
     if (!existing) {
       return NextResponse.json({ success: false, error: "Cliente no encontrado" }, { status: 404 });
     }
-    if (existing.userId !== decoded.userId) {
+    if (existing.userId !== userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 403 });
     }
 
@@ -91,21 +81,16 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const token = request.cookies.get("token")?.value;
-    if (!token) {
+    const userId = await verifyAuth(request);
+    if (!userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
-    }
-
-    const decoded = await verifyToken(token);
-    if (!decoded) {
-      return NextResponse.json({ success: false, error: "Token inválido" }, { status: 401 });
     }
 
     const existing = await prisma.client.findUnique({ where: { id: params.id } });
     if (!existing) {
       return NextResponse.json({ success: false, error: "Cliente no encontrado" }, { status: 404 });
     }
-    if (existing.userId !== decoded.userId) {
+    if (existing.userId !== userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 403 });
     }
 

@@ -1,27 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken, getUserById, checkAndIncrementUsage } from "@/lib/auth";
-import { generateMultipleArticles } from "@/lib/claude";
+import { checkAndIncrementUsage } from "@/lib/auth";
+import { generateMultipleArticles } from "@/lib/groq";
 import { prisma } from "@/lib/db";
 import { GenerateArticleRequest } from "@/types";
+import { getAuthenticatedUser } from "@/lib/api-auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get("token")?.value;
-
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: "No autorizado" },
-        { status: 401 }
-      );
-    }
-
-    const decoded = await verifyToken(token);
-
-    if (!decoded) {
-      return NextResponse.json(
-        { success: false, error: "Token inválido" },
-        { status: 401 }
-      );
+    const auth = await getAuthenticatedUser(request);
+    if (!auth) {
+      return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
     }
 
     const body = (await request.json()) as GenerateArticleRequest;
@@ -50,16 +38,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await getUserById(decoded.userId);
+    const { user, userId } = auth;
 
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: "Usuario no encontrado" },
-        { status: 404 }
-      );
-    }
-
-    const usageCheck = await checkAndIncrementUsage(decoded.userId, numArticles);
+    const usageCheck = await checkAndIncrementUsage(userId, numArticles);
     if (!usageCheck.success) {
       return NextResponse.json(
         { success: false, error: usageCheck.error },
@@ -72,7 +53,7 @@ export async function POST(request: NextRequest) {
       const profile = await prisma.voiceProfile.findUnique({
         where: { id: voiceProfileId },
       });
-      if (profile && profile.userId === decoded.userId) {
+      if (profile && profile.userId === userId) {
         const parsed = JSON.parse(profile.styleGuide);
         styleGuide = parsed.styleGuide;
       }
@@ -99,7 +80,7 @@ export async function POST(request: NextRequest) {
       articles.map((article) =>
         prisma.article.create({
           data: {
-            userId: decoded.userId,
+            userId,
             title: article.title,
             content: article.content,
             keywords: JSON.stringify(article.keywords),

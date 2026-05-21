@@ -145,6 +145,8 @@ export async function getUserById(userId: string) {
       articlesLimitPerMonth: true,
       articlesUsedThisMonth: true,
       billingCycleEnd: true,
+      defaultLanguage: true,
+      defaultTone: true,
     },
   });
 }

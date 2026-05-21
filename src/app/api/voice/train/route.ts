@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
 import { analyzeWritingStyle } from "@/lib/voice";
 import { prisma } from "@/lib/db";
+import { verifyAuth } from "@/lib/api-auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get("token")?.value;
-    if (!token) {
+    const userId = await verifyAuth(request);
+    if (!userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
-    }
-
-    const decoded = await verifyToken(token);
-    if (!decoded) {
-      return NextResponse.json({ success: false, error: "Token inválido" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -47,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     const profile = await prisma.voiceProfile.create({
       data: {
-        userId: decoded.userId,
+        userId,
         name: name.trim(),
         styleGuide: JSON.stringify(styleGuide),
         sampleCount: articles.length,

@@ -1,30 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken, getUserById } from "@/lib/auth";
 import { encrypt, decrypt } from "@/lib/encryption";
 import { testWordPressConnection } from "@/lib/wordpress";
 import { prisma } from "@/lib/db";
 import { hasFeature } from "@/lib/plans";
+import { verifyAuth, getAuthenticatedUser } from "@/lib/api-auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get("token")?.value;
-
-    if (!token) {
-      return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
-    }
-
-    const decoded = await verifyToken(token);
-
-    if (!decoded) {
-      return NextResponse.json({ success: false, error: "Token inválido" }, { status: 401 });
-    }
-
     const body = await request.json();
     const { wordpressUrl, wordpressUsername, wordpressPassword, action } = body;
 
     if (action === "test") {
-      const user = await getUserById(decoded.userId);
-      if (!user || !hasFeature(user.subscriptionPlan, "wordpress")) {
+      const auth = await getAuthenticatedUser(request);
+      if (!auth) {
+        return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
+      }
+      if (!hasFeature(auth.user.subscriptionPlan, "wordpress")) {
         return NextResponse.json(
           { success: false, error: "Esta feature requiere el plan Pro o Agency" },
           { status: 403 }
@@ -48,8 +39,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "save") {
-      const user = await getUserById(decoded.userId);
-      if (!user || !hasFeature(user.subscriptionPlan, "wordpress")) {
+      const auth = await getAuthenticatedUser(request);
+      if (!auth) {
+        return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
+      }
+      if (!hasFeature(auth.user.subscriptionPlan, "wordpress")) {
         return NextResponse.json(
           { success: false, error: "Esta feature requiere el plan Pro o Agency" },
           { status: 403 }
@@ -77,7 +71,7 @@ export async function POST(request: NextRequest) {
       }
 
       await prisma.user.update({
-        where: { id: decoded.userId },
+        where: { id: auth.userId },
         data: {
           wordpressUrl,
           wordpressUsername,
@@ -90,8 +84,13 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "disconnect") {
+      const userId = await verifyAuth(request);
+      if (!userId) {
+        return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
+      }
+
       await prisma.user.update({
-        where: { id: decoded.userId },
+        where: { id: userId },
         data: {
           wordpressUrl: null,
           wordpressUsername: null,
@@ -112,20 +111,13 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get("token")?.value;
-
-    if (!token) {
+    const userId = await verifyAuth(request);
+    if (!userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
     }
 
-    const decoded = await verifyToken(token);
-
-    if (!decoded) {
-      return NextResponse.json({ success: false, error: "Token inválido" }, { status: 401 });
-    }
-
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: userId },
       select: { wordpressConnected: true, wordpressUrl: true },
     });
 

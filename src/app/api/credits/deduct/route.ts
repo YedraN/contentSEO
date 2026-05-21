@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken, deductCredits } from "@/lib/auth";
+import { deductCredits } from "@/lib/auth";
+import { verifyAuth } from "@/lib/api-auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get("token")?.value;
-    const { amount } = await request.json();
-
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: "No autorizado" },
-        { status: 401 }
-      );
+    const userId = await verifyAuth(request);
+    if (!userId) {
+      return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
     }
+
+    const { amount } = await request.json();
 
     if (!amount || amount <= 0) {
       return NextResponse.json(
@@ -20,16 +18,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const decoded = await verifyToken(token);
-
-    if (!decoded) {
-      return NextResponse.json(
-        { success: false, error: "Token inválido" },
-        { status: 401 }
-      );
-    }
-
-    const success = await deductCredits(decoded.userId, amount);
+    const success = await deductCredits(userId, amount);
 
     if (!success) {
       return NextResponse.json(

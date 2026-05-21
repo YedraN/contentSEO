@@ -1,31 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { generateMarkdown, generateHTML, generateWordDocument } from "@/lib/exports";
+import { verifyAuth } from "@/lib/api-auth";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const token = request.cookies.get("token")?.value;
+    const userId = await verifyAuth(request);
+    if (!userId) {
+      return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
+    }
+
     const format = new URL(request.url).searchParams.get("format") || "markdown";
-
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: "No autorizado" },
-        { status: 401 }
-      );
-    }
-
-    const decoded = await verifyToken(token);
-
-    if (!decoded) {
-      return NextResponse.json(
-        { success: false, error: "Token inválido" },
-        { status: 401 }
-      );
-    }
 
     const article = await prisma.article.findUnique({
       where: { id: params.id },
@@ -38,7 +26,7 @@ export async function GET(
       );
     }
 
-    if (article.userId !== decoded.userId) {
+    if (article.userId !== userId) {
       return NextResponse.json(
         { success: false, error: "No autorizado" },
         { status: 403 }

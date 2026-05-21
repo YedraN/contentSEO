@@ -1,22 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { verifyAuth } from "@/lib/api-auth";
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const token = request.cookies.get("token")?.value;
-
-    if (!token) {
+    const userId = await verifyAuth(request);
+    if (!userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
-    }
-
-    const decoded = await verifyToken(token);
-
-    if (!decoded) {
-      return NextResponse.json({ success: false, error: "Token inválido" }, { status: 401 });
     }
 
     const article = await prisma.article.findUnique({ where: { id: params.id } });
@@ -25,7 +18,7 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: "Artículo no encontrado" }, { status: 404 });
     }
 
-    if (article.userId !== decoded.userId) {
+    if (article.userId !== userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 403 });
     }
 
@@ -43,6 +36,7 @@ export async function PATCH(
       where: { id: params.id },
       data: { title: title.trim(), content: content.trim() },
     });
+
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {

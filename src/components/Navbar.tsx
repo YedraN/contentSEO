@@ -5,45 +5,16 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { classNames } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userName, setUserName] = useState("");
+  const { user, isLoading, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  useEffect(() => {
-    const storedName = localStorage.getItem("userName");
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-
-    if (loggedIn && storedName) {
-      setIsAuthenticated(true);
-      setUserName(storedName);
-    }
-
-    const checkAuth = async () => {
-      try {
-        const response = await fetch("/api/credits/check");
-        if (response.ok) {
-          const data = await response.json();
-          const name = data.data?.name || localStorage.getItem("userName") || "";
-          setIsAuthenticated(true);
-          setUserName(name);
-          localStorage.setItem("isLoggedIn", "true");
-          if (name) localStorage.setItem("userName", name);
-        } else {
-          setIsAuthenticated(false);
-          localStorage.removeItem("isLoggedIn");
-          localStorage.removeItem("userName");
-        }
-      } catch {
-        // keep optimistic state from localStorage
-      }
-    };
-    checkAuth();
-  }, [pathname]);
+  const isAuthenticated = !isLoading && user !== null;
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 20);
@@ -52,15 +23,8 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("userName");
-      setIsAuthenticated(false);
-      router.push("/");
-    } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-    }
+    await logout();
+    router.push("/");
   };
 
   const navLinks = isAuthenticated
@@ -114,9 +78,9 @@ export default function Navbar() {
                   className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all duration-200"
                 >
                   <div className="w-7 h-7 bg-gradient-to-br from-brand-400 to-brand-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">
-                    {userName.charAt(0).toUpperCase()}
+                    {(user?.name ?? "?").charAt(0).toUpperCase()}
                   </div>
-                  <span>{userName}</span>
+                  <span>{user?.name ?? ""}</span>
                 </Link>
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
                   Cerrar sesión
@@ -188,7 +152,7 @@ export default function Navbar() {
                 className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all"
               >
                 <div className="w-7 h-7 bg-gradient-to-br from-brand-400 to-brand-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">
-                  {userName.charAt(0).toUpperCase()}
+                  {(user?.name ?? "?").charAt(0).toUpperCase()}
                 </div>
                 Mi perfil
               </Link>

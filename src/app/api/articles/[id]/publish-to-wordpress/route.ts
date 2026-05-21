@@ -1,29 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
 import { decrypt } from "@/lib/encryption";
 import { publishPostToWordPress } from "@/lib/wordpress";
 import { prisma } from "@/lib/db";
 import { hasFeature } from "@/lib/plans";
+import { verifyAuth } from "@/lib/api-auth";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const token = request.cookies.get("token")?.value;
-
-    if (!token) {
+    const userId = await verifyAuth(request);
+    if (!userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
     }
 
-    const decoded = await verifyToken(token);
-
-    if (!decoded) {
-      return NextResponse.json({ success: false, error: "Token inválido" }, { status: 401 });
-    }
-
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: userId },
       select: {
         id: true,
         wordpressConnected: true,
@@ -60,7 +53,7 @@ export async function POST(
       return NextResponse.json({ success: false, error: "Artículo no encontrado" }, { status: 404 });
     }
 
-    if (article.userId !== decoded.userId) {
+    if (article.userId !== userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 403 });
     }
 

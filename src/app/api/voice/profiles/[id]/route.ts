@@ -1,20 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { verifyAuth } from "@/lib/api-auth";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const token = request.cookies.get("token")?.value;
-    if (!token) {
+    const userId = await verifyAuth(request);
+    if (!userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
-    }
-
-    const decoded = await verifyToken(token);
-    if (!decoded) {
-      return NextResponse.json({ success: false, error: "Token inválido" }, { status: 401 });
     }
 
     const profile = await prisma.voiceProfile.findUnique({
@@ -25,7 +20,7 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Perfil no encontrado" }, { status: 404 });
     }
 
-    if (profile.userId !== decoded.userId) {
+    if (profile.userId !== userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 403 });
     }
 
@@ -47,14 +42,9 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const token = request.cookies.get("token")?.value;
-    if (!token) {
+    const userId = await verifyAuth(request);
+    if (!userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
-    }
-
-    const decoded = await verifyToken(token);
-    if (!decoded) {
-      return NextResponse.json({ success: false, error: "Token inválido" }, { status: 401 });
     }
 
     const profile = await prisma.voiceProfile.findUnique({
@@ -65,7 +55,7 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Perfil no encontrado" }, { status: 404 });
     }
 
-    if (profile.userId !== decoded.userId) {
+    if (profile.userId !== userId) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 403 });
     }
 

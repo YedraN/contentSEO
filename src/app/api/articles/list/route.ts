@@ -1,25 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { verifyAuth } from "@/lib/api-auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get("token")?.value;
-
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: "No autorizado" },
-        { status: 401 }
-      );
-    }
-
-    const decoded = await verifyToken(token);
-
-    if (!decoded) {
-      return NextResponse.json(
-        { success: false, error: "Token inválido" },
-        { status: 401 }
-      );
+    const userId = await verifyAuth(request);
+    if (!userId) {
+      return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
     }
 
     const url = new URL(request.url);
@@ -28,7 +15,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
     const clientFilter = url.searchParams.get("clientId") || "";
 
-    const where = { userId: decoded.userId };
+    const where = { userId };
     if (clientFilter) {
       (where as any).clientId = clientFilter;
     }
