@@ -38,7 +38,10 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(git commit -m 'Add export const dynamic = '\\\\''force-dynamic'\\\\'' to missing API routes and landing page *)",
-      "Bash(git commit -m 'Fix dashboard page Server/Client component separation *)"
+      "Bash(git commit -m 'Fix dashboard page Server/Client component separation *)",
+      "Bash(git commit -m 'Bump version to force Vercel cache invalidation *)",
+      "Bash(git commit -m 'Simplify dashboard page to absolute minimum *)",
+      "Bash(git commit -m 'Merge DashboardClient into page.tsx to resolve Vercel manifest issue *)"
     ]
   }
 }
