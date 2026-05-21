@@ -9,7 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://featseo.io"),
+  metadataBase: new URL("https://featseo.com"),
   title: {
     default: "FeatSEO — Generador de Artículos SEO para Agencias",
     template: "%s | FeatSEO",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     "WordPress IA",
     "redactor IA agencia",
   ],
-  authors: [{ name: "FeatSEO", url: "https://featseo.io" }],
+  authors: [{ name: "FeatSEO", url: "https://featseo.com" }],
   creator: "FeatSEO",
   publisher: "FeatSEO",
   robots: {
@@ -40,14 +40,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_ES",
-    url: "https://featseo.io",
+    url: "https://featseo.com",
     title: "FeatSEO — Generador de Artículos SEO para Agencias",
     description:
       "Genera 150+ artículos SEO al mes. White-label, WordPress 1-click, 97% menos coste.",
     siteName: "FeatSEO",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.svg",
         width: 1200,
         height: 630,
         alt: "FeatSEO - Generador de artículos SEO",
@@ -58,14 +58,14 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "FeatSEO — Generador de Artículos SEO",
     description: "Genera artículos SEO optimizados en minutos con IA.",
-    images: ["/og-image.png"],
+    images: ["/og-image.svg"],
   },
   alternates: {
-    canonical: "https://featseo.io",
+    canonical: "https://featseo.com",
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon: "/favicon.svg",
+    apple: "/favicon.svg",
   },
 };
 

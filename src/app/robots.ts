@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/dashboard/", "/api/"],
       },
     ],
-    sitemap: "https://contentseo.io/sitemap.xml",
+    sitemap: "https://featseo.com/sitemap.xml",
   };
 }

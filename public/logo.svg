@@ -1,0 +1,25 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="100" fill="url(#grad)" />
+
+  <!-- Document icon -->
+  <path d="M70 50H110C112.209 50 114 51.791 114 54V146C114 148.209 112.209 150 110 150H70C67.791 150 66 148.209 66 146V54C66 51.791 67.791 50 70 50Z" fill="white" />
+
+  <!-- Lines on document -->
+  <line x1="74" y1="70" x2="106" y2="70" stroke="url(#grad)" stroke-width="2" stroke-linecap="round" />
+  <line x1="74" y1="85" x2="106" y2="85" stroke="url(#grad)" stroke-width="2" stroke-linecap="round" />
+  <line x1="74" y1="100" x2="106" y2="100" stroke="url(#grad)" stroke-width="2" stroke-linecap="round" />
+  <line x1="74" y1="115" x2="90" y2="115" stroke="url(#grad)" stroke-width="2" stroke-linecap="round" />
+
+  <!-- Spark icon (top-right) -->
+  <g transform="translate(115, 45)">
+    <path d="M0 3L1.5 1.5M0 3L1.5 4.5M0 3L-1.5 1.5M0 3L-1.5 4.5" stroke="white" stroke-width="1" stroke-linecap="round" />
+    <circle cx="0" cy="3" r="1.5" stroke="white" stroke-width="1" fill="none" />
+  </g>
+</svg>

@@ -507,7 +507,7 @@ export default function SettingsPage() {
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
             <p className="text-sm font-semibold text-amber-900 mb-2">Disponible en plan Pro o Agency</p>
             <p className="text-xs text-amber-700 mb-3">
-              Sube de plan para conectar tu WordPress y publicar artículos con un clic desde ContentSEO.
+              Sube de plan para conectar tu WordPress y publicar artículos con un clic desde FeatSEO.
             </p>
             <Link href="/credits">
               <button className="text-xs font-semibold text-amber-700 hover:text-amber-800 underline">

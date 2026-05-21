@@ -27,7 +27,8 @@
       "Bash(dir \"C:\\\\Users\\\\FDCV\\\\Documents\\\\contentSEO\\\\src\" /s /b)",
       "WebFetch(domain:agencyanalytics.com)",
       "WebFetch(domain:mavance.es)",
-      "WebFetch(domain:dinorank.com)"
+      "WebFetch(domain:dinorank.com)",
+      "Bash(Get-ChildItem C:\\\\Users\\\\FDCV\\\\Documents\\\\contentSEO\\\\src\\\\app\\\\\\(dashboard\\) *)"
     ]
   }
 }

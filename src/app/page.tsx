@@ -1,6 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import { AnimationsWrapper } from "@/components/landing/AnimationsWrapper";
+
+export const metadata: Metadata = {
+  title: "FeatSEO — Generador de Artículos SEO con IA para Agencias",
+  description: "Genera 150+ artículos SEO al mes para los clientes de tu agencia. White-label, WordPress en 1 clic, 97% menos coste que un redactor. Prueba gratis.",
+  alternates: {
+    canonical: "https://featseo.com",
+  },
+};
 
 const features = [
   {
@@ -129,12 +138,12 @@ const faqs = [
     a: "Sí. Cada artículo incluye title tag, meta description, estructura H1-H3, densidad de keywords controlada y schema markup. No es contenido genérico: configuras las keywords objetivo y la industria antes de generar.",
   },
   {
-    q: "¿Mis clientes sabrán que uso ContentSEO?",
+    q: "¿Mis clientes sabrán que uso FeatSEO?",
     a: "No. Con el plan Professional y Enterprise activas el white-label: tu dominio, tu logo, tus colores. Tus clientes ven tu agencia, no nosotros.",
   },
   {
     q: "¿Qué pasa si necesito más de 150 artículos al mes?",
-    a: "Escríbenos a hola@contentseo.io y te hacemos un plan a medida. Tenemos agencias generando más de 500 artículos mensuales.",
+    a: "Escríbenos a hola@featseo.com y te hacemos un plan a medida. Tenemos agencias generando más de 500 artículos mensuales.",
   },
   {
     q: "¿Puedo cancelar en cualquier momento?",
@@ -145,14 +154,14 @@ const faqs = [
 const jsonLdSoftwareApplication = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "ContentSEO",
+  name: "FeatSEO",
   applicationCategory: "BusinessApplication",
   description: "Generador de artículos SEO optimizados con IA para agencias",
   offers: {
     "@type": "Offer",
-    price: "99",
+    price: "49",
     priceCurrency: "USD",
-    url: "https://contentseo.io",
+    url: "https://featseo.com",
   },
   operatingSystem: "Web",
 };
@@ -160,15 +169,15 @@ const jsonLdSoftwareApplication = {
 const jsonLdOrganization = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "ContentSEO",
-  url: "https://contentseo.io",
-  logo: "https://contentseo.io/logo.png",
+  name: "FeatSEO",
+  url: "https://featseo.com",
+  logo: "https://featseo.com/logo.svg",
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "Customer Support",
-    email: "hola@contentseo.io",
+    email: "hola@featseo.com",
   },
-  sameAs: ["https://twitter.com/contentseo"],
+  sameAs: ["https://twitter.com/featseo"],
 };
 
 const jsonLdFaq = {
@@ -311,7 +320,7 @@ export default function Home() {
 
               <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-16">
                 <div className="rounded-2xl border-2 border-red-100 bg-red-50/50 p-8">
-                  <p className="text-xs font-bold uppercase tracking-wider text-red-500 mb-5">Antes de ContentSEO</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-red-500 mb-5">Antes de FeatSEO</p>
                   <ul className="space-y-4">
                     {[
                       "3 redactores freelance a €0,06/palabra → €900/mes mínimo",
@@ -331,7 +340,7 @@ export default function Home() {
                 </div>
 
                 <div className="rounded-2xl border-2 border-brand-200 bg-brand-50/50 p-8">
-                  <p className="text-xs font-bold uppercase tracking-wider text-brand-600 mb-5">Después de ContentSEO</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-brand-600 mb-5">Después de FeatSEO</p>
                   <ul className="space-y-4">
                     {[
                       "€399/mes → 150 artículos incluidos (€2,66/artículo)",
@@ -371,7 +380,7 @@ export default function Home() {
                     <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                   </svg>
                   <blockquote className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8">
-                    "Llevábamos dos años queriendo escalar el servicio de contenidos pero el cuello de botella siempre eran los redactores. Con ContentSEO generamos en una tarde lo que antes tardábamos tres semanas. Y el white-label nos permitió presentarlo como nuestro propio producto a los clientes."
+                    "Llevábamos dos años queriendo escalar el servicio de contenidos pero el cuello de botella siempre eran los redactores. Con FeatSEO generamos en una tarde lo que antes tardábamos tres semanas. Y el white-label nos permitió presentarlo como nuestro propio producto a los clientes."
                   </blockquote>
                   <figcaption className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
@@ -447,7 +456,7 @@ export default function Home() {
                       ))}
                     </ul>
 
-                    <Link href={plan.id === "enterprise" ? "mailto:hola@contentseo.io" : "/register"}>
+                    <Link href={plan.id === "enterprise" ? "mailto:hola@featseo.com" : "/register"}>
                       <Button
                         variant={plan.popular ? "primary" : "outline"}
                         className="w-full"
@@ -461,7 +470,7 @@ export default function Home() {
 
               <p className="text-center text-sm text-gray-500 mt-8">
                 ¿Necesitas más de 150 artículos al mes?{" "}
-                <a href="mailto:hola@contentseo.io" className="text-brand-600 font-medium hover:underline">
+                <a href="mailto:hola@featseo.com" className="text-brand-600 font-medium hover:underline">
                   Escríbenos
                 </a>{" "}
                 y te hacemos un plan personalizado.
@@ -509,7 +518,7 @@ export default function Home() {
                     Solicitar acceso gratis
                   </Button>
                 </Link>
-                <a href="mailto:hola@contentseo.io" className="text-gray-400 hover:text-white text-sm font-medium transition-colors">
+                <a href="mailto:hola@featseo.com" className="text-gray-400 hover:text-white text-sm font-medium transition-colors">
                   O escríbenos directamente →
                 </a>
               </div>

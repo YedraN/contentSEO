@@ -67,7 +67,7 @@ export default function RegisterPage() {
         localStorage.setItem("userName", data.data.name);
         localStorage.setItem("isLoggedIn", "true");
       }
-      toast.success("¡Cuenta creada! Bienvenido a ContentSEO");
+      toast.success("¡Cuenta creada! Bienvenido a FeatSEO");
       router.push("/dashboard");
     } catch {
       toast.error("Error al crear la cuenta. Inténtalo de nuevo.");
@@ -188,7 +188,7 @@ export default function RegisterPage() {
         <ul className="space-y-4">
           {[
             { icon: "🚀", title: "150 artículos en tu primer mes", desc: "Gratis, sin tarjeta, sin compromiso." },
-            { icon: "🏷️", title: "White-label desde el día 1", desc: "Tu dominio, tu logo, tu marca. Tus clientes no ven ContentSEO." },
+            { icon: "🏷️", title: "White-label desde el día 1", desc: "Tu dominio, tu logo, tu marca. Tus clientes no ven FeatSEO." },
             { icon: "⚡", title: "30 segundos por artículo", desc: "Lo que un redactor tarda días, tú lo tienes en medio minuto." },
             { icon: "🔌", title: "Publica en WordPress con 1 clic", desc: "Sin copiar-pegar. Directo al CMS de tu cliente." },
           ].map((item, i) => (
