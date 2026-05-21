@@ -3,6 +3,8 @@ import Link from "next/link";
 import Button from "@/components/ui/Button";
 import { AnimationsWrapper } from "@/components/landing/AnimationsWrapper";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "FeatSEO — Generador de Artículos SEO con IA para Agencias",
   description: "Genera 150+ artículos SEO al mes para los clientes de tu agencia. White-label, WordPress en 1 clic, 97% menos coste que un redactor. Prueba gratis.",
