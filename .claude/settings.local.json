@@ -41,7 +41,11 @@
       "Bash(git commit -m 'Fix dashboard page Server/Client component separation *)",
       "Bash(git commit -m 'Bump version to force Vercel cache invalidation *)",
       "Bash(git commit -m 'Simplify dashboard page to absolute minimum *)",
-      "Bash(git commit -m 'Merge DashboardClient into page.tsx to resolve Vercel manifest issue *)"
+      "Bash(git commit -m 'Merge DashboardClient into page.tsx to resolve Vercel manifest issue *)",
+      "Bash(rm -rf .next node_modules/.cache)",
+      "Bash(npm ci *)",
+      "Bash(git commit -m 'Force Vercel to skip build cache with dynamic build ID *)",
+      "Bash(del *)"
     ]
   }
 }
