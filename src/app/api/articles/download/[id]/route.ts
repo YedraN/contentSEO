@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { generateMarkdown, generateHTML, generateWordDocument } from "@/lib/exports";
 import { verifyAuth } from "@/lib/api-auth";
+import { parseKeywords } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +48,7 @@ export async function GET(
     const articleData = {
       title: article.title,
       content: article.content,
-      keywords: article.keywords as unknown as string[],
+      keywords: parseKeywords(article.keywords),
       metaDescription: article.metaDescription || "",
       readingTime: article.readingTime || 5,
     };

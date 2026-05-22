@@ -1,8 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyAuth } from "@/lib/api-auth";
+import { parseKeywords } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic';
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const userId = await verifyAuth(request);
+    if (!userId) {
+      return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
+    }
+
+    const article = await prisma.article.findUnique({ where: { id: params.id } });
+
+    if (!article) {
+      return NextResponse.json({ success: false, error: "Artículo no encontrado" }, { status: 404 });
+    }
+
+    if (article.userId !== userId) {
+      return NextResponse.json({ success: false, error: "No autorizado" }, { status: 403 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: { ...article, keywords: parseKeywords(article.keywords) },
+    });
+  } catch (error) {
+    console.error("Error obteniendo artículo:", error);
+    return NextResponse.json({ success: false, error: "Error en el servidor" }, { status: 500 });
+  }
+}
 
 export async function PATCH(
   request: NextRequest,
