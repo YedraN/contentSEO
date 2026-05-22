@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import { AnimationsWrapper } from "@/components/landing/AnimationsWrapper";
+import Article3DSection from "@/components/landing/Article3DSection";
 
 export const dynamic = 'force-dynamic';
 
@@ -274,6 +275,9 @@ export default function Home() {
               </div>
             </div>
           </section>
+
+          {/* 3D Scroll Section */}
+          <Article3DSection />
 
           {/* Features */}
           <section id="features" className="py-24 lg:py-32 scroll-mt-24 bg-white">
