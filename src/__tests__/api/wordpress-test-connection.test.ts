@@ -2,22 +2,41 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "@/app/api/wordpress/test-connection/route";
 import { NextRequest } from "next/server";
 
-const mockVerifyToken = vi.hoisted(() => vi.fn());
+const mockGetAuthenticatedUser = vi.hoisted(() => vi.fn());
 const mockTestConnection = vi.hoisted(() => vi.fn());
 const mockDecrypt = vi.hoisted(() => vi.fn());
 const mockPrisma = vi.hoisted(() => ({
   user: { findUnique: vi.fn() },
 }));
 
-vi.mock("@/lib/auth", () => ({ verifyToken: mockVerifyToken }));
+vi.mock("@/lib/api-auth", () => ({
+  verifyAuth: vi.fn(),
+  getAuthenticatedUser: mockGetAuthenticatedUser,
+}));
 vi.mock("@/lib/wordpress", () => ({ testWordPressConnection: mockTestConnection }));
 vi.mock("@/lib/encryption", () => ({ decrypt: mockDecrypt }));
 vi.mock("@/lib/db", () => ({ prisma: mockPrisma }));
 
+const proUser = {
+  userId: "user-1",
+  user: {
+    id: "user-1",
+    subscriptionPlan: "pro",
+    subscriptionStatus: "active",
+    credits: 10,
+    name: "Test",
+    email: "test@test.com",
+    articlesLimitPerMonth: 100,
+    articlesUsedThisMonth: 0,
+    billingCycleEnd: null,
+    defaultLanguage: "es",
+    defaultTone: "professional",
+  },
+};
+
 function createRequest(token?: string): NextRequest {
   const headers: Record<string, string> = {};
   if (token) headers["Cookie"] = `token=${token}`;
-
   return new NextRequest("http://localhost:3000/api/wordpress/test-connection", {
     method: "POST",
     headers,
@@ -30,6 +49,8 @@ beforeEach(() => {
 
 describe("POST /api/wordpress/test-connection", () => {
   it("debe retornar 401 si no hay token", async () => {
+    mockGetAuthenticatedUser.mockResolvedValue(null);
+
     const res = await POST(createRequest());
     const body = await res.json();
 
@@ -37,18 +58,21 @@ describe("POST /api/wordpress/test-connection", () => {
     expect(body.error).toBe("No autorizado");
   });
 
-  it("debe retornar 401 si el token es inválido", async () => {
-    mockVerifyToken.mockResolvedValue(null);
+  it("debe retornar 403 si el plan no permite WordPress", async () => {
+    mockGetAuthenticatedUser.mockResolvedValue({
+      ...proUser,
+      user: { ...proUser.user, subscriptionPlan: "starter" },
+    });
 
-    const res = await POST(createRequest("invalid-token"));
+    const res = await POST(createRequest("valid-token"));
     const body = await res.json();
 
-    expect(res.status).toBe(401);
-    expect(body.error).toBe("Token inválido");
+    expect(res.status).toBe(403);
+    expect(body.error).toContain("Pro o Agency");
   });
 
-  it("debe retornar 404 si el usuario no existe", async () => {
-    mockVerifyToken.mockResolvedValue({ userId: "user-1" });
+  it("debe retornar 404 si el usuario no existe en BD", async () => {
+    mockGetAuthenticatedUser.mockResolvedValue(proUser);
     mockPrisma.user.findUnique.mockResolvedValue(null);
 
     const res = await POST(createRequest("valid-token"));
@@ -59,7 +83,7 @@ describe("POST /api/wordpress/test-connection", () => {
   });
 
   it("debe retornar 400 si no hay credenciales configuradas", async () => {
-    mockVerifyToken.mockResolvedValue({ userId: "user-1" });
+    mockGetAuthenticatedUser.mockResolvedValue(proUser);
     mockPrisma.user.findUnique.mockResolvedValue({
       id: "user-1",
       wordpressUrl: null,
@@ -75,7 +99,7 @@ describe("POST /api/wordpress/test-connection", () => {
   });
 
   it("debe retornar 200 si la conexión es exitosa", async () => {
-    mockVerifyToken.mockResolvedValue({ userId: "user-1" });
+    mockGetAuthenticatedUser.mockResolvedValue(proUser);
     mockPrisma.user.findUnique.mockResolvedValue({
       id: "user-1",
       wordpressUrl: "https://misitio.com",
@@ -100,7 +124,7 @@ describe("POST /api/wordpress/test-connection", () => {
   });
 
   it("debe retornar 400 si la conexión falla", async () => {
-    mockVerifyToken.mockResolvedValue({ userId: "user-1" });
+    mockGetAuthenticatedUser.mockResolvedValue(proUser);
     mockPrisma.user.findUnique.mockResolvedValue({
       id: "user-1",
       wordpressUrl: "https://misitio.com",
@@ -119,7 +143,7 @@ describe("POST /api/wordpress/test-connection", () => {
   });
 
   it("debe retornar 500 si hay error inesperado", async () => {
-    mockVerifyToken.mockResolvedValue({ userId: "user-1" });
+    mockGetAuthenticatedUser.mockResolvedValue(proUser);
     mockPrisma.user.findUnique.mockRejectedValue(new Error("Unexpected"));
 
     const res = await POST(createRequest("valid-token"));

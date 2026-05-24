@@ -198,11 +198,21 @@ export async function deductCredits(
   }
 }
 
+/**
+ * Atomically checks and deducts credits/usage within a Prisma transaction.
+ * Uses conditional UPDATE (WHERE credits >= N) to prevent race conditions
+ * when multiple requests arrive simultaneously for the same user.
+ *
+ * Returns `{ success: true, usedSubscription }` on success so the caller
+ * knows which balance to refund on failure.
+ */
 export async function checkAndIncrementUsage(
   userId: string,
   articlesToGenerate: number
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; usedSubscription?: boolean; error?: string }> {
   try {
+    // Read the user first to determine their billing mode and to produce a
+    // human-readable error message with the exact remaining count.
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -217,47 +227,78 @@ export async function checkAndIncrementUsage(
       return { success: false, error: "Usuario no encontrado" };
     }
 
-    // If user has active subscription: use monthly limits
+    // --- Subscription path ---
     if (user.subscriptionStatus === "active") {
-      const remainingArticles = user.articlesLimitPerMonth - (user.articlesUsedThisMonth || 0);
-      if (remainingArticles < articlesToGenerate) {
+      const remaining = user.articlesLimitPerMonth - (user.articlesUsedThisMonth || 0);
+      if (remaining < articlesToGenerate) {
         return {
           success: false,
-          error: `Límite mensual alcanzado. Dispones de ${remainingArticles} artículos más este mes.`,
+          error: `Límite mensual alcanzado. Dispones de ${remaining} artículo${remaining !== 1 ? "s" : ""} más este mes.`,
         };
       }
 
-      // Increment usage
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          articlesUsedThisMonth: {
-            increment: articlesToGenerate,
-          },
+      // Atomic increment: only succeeds if the check still passes at commit time.
+      const updated = await prisma.user.updateMany({
+        where: {
+          id: userId,
+          articlesUsedThisMonth: { lte: user.articlesLimitPerMonth - articlesToGenerate },
         },
+        data: { articlesUsedThisMonth: { increment: articlesToGenerate } },
       });
 
-      return { success: true };
+      if (updated.count === 0) {
+        return { success: false, error: "Límite mensual alcanzado (intento concurrente detectado)." };
+      }
+
+      return { success: true, usedSubscription: true };
     }
 
-    // Otherwise fall back to old credits system (trial users)
+    // --- Credit path (trial / one-off) ---
     if ((user.credits || 0) < articlesToGenerate) {
       return { success: false, error: "Créditos insuficientes" };
     }
 
-    // Deduct from credits
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        credits: {
-          decrement: articlesToGenerate,
-        },
+    const updated = await prisma.user.updateMany({
+      where: {
+        id: userId,
+        credits: { gte: articlesToGenerate },
       },
+      data: { credits: { decrement: articlesToGenerate } },
     });
 
-    return { success: true };
+    if (updated.count === 0) {
+      return { success: false, error: "Créditos insuficientes (intento concurrente detectado)." };
+    }
+
+    return { success: true, usedSubscription: false };
   } catch (error) {
     console.error("Error checking article usage:", error);
     return { success: false, error: "Error procesando solicitud" };
+  }
+}
+
+/**
+ * Refunds credits or monthly usage for a user after a failed generation.
+ * Called from the Inngest onFailure handler.
+ */
+export async function refundCredits(
+  userId: string,
+  amount: number,
+  usedSubscription: boolean
+): Promise<void> {
+  try {
+    if (usedSubscription) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { articlesUsedThisMonth: { decrement: amount } },
+      });
+    } else {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { credits: { increment: amount } },
+      });
+    }
+  } catch (error) {
+    console.error("Error refunding credits:", error);
   }
 }

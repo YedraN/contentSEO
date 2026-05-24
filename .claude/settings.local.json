@@ -47,7 +47,18 @@
       "Bash(git commit -m 'Force Vercel to skip build cache with dynamic build ID *)",
       "Bash(del *)",
       "Bash(npx vitest *)",
-      "Bash(git commit -m 'fix: auth navbar + wordpress completo \\(fases 1 y 2\\) *)"
+      "Bash(git commit -m 'fix: auth navbar + wordpress completo \\(fases 1 y 2\\) *)",
+      "Bash(npx dotenv *)",
+      "Bash(node -e \"require\\('dotenv'\\).config\\({path:'.env.local'}\\); require\\('child_process'\\).execSync\\('npx prisma migrate dev --name add_generation_jobs_and_indexes', {stdio:'inherit', env: process.env}\\)\")",
+      "Bash(node -e \"require\\('dotenv'\\).config\\({path:'.env.local'}\\); require\\('child_process'\\).execSync\\('npx prisma migrate dev --name add_generation_jobs_and_indexes --create-only', {stdio:'inherit', env: process.env}\\)\")",
+      "Bash(node -e \"require\\('inngest'\\); console.log\\('inngest ok:', require\\('./node_modules/inngest/package.json'\\).version\\)\")",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\juanj\\\\Documents\\\\contentSEO\\\\src\\\\inngest\\\\functions\")",
+      "Bash(Out-Null)",
+      "PowerShell(New-Item)",
+      "PowerShell(New-Item *)",
+      "Bash(node -e \"const i = require\\('./node_modules/inngest'\\); console.log\\(Object.keys\\(i\\)\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(git commit -m 'feat: generacion async con Inngest + fix race conditions creditos \\(fase 3\\) *)"
     ]
   }
 }

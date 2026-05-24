@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkAndIncrementUsage } from "@/lib/auth";
-import { generateMultipleArticles } from "@/lib/groq";
 import { prisma } from "@/lib/db";
+import { inngest } from "@/lib/inngest";
 import { GenerateArticleRequest } from "@/types";
 import { getAuthenticatedUser } from "@/lib/api-auth";
+import type { GenerateArticleEventData } from "@/inngest/functions/generate-article";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,85 +41,84 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { user, userId } = auth;
+    const { userId } = auth;
 
+    // ── Debit credits atomically BEFORE creating the job ─────────────────────
     const usageCheck = await checkAndIncrementUsage(userId, numArticles);
     if (!usageCheck.success) {
-      return NextResponse.json(
-        { success: false, error: usageCheck.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: usageCheck.error }, { status: 400 });
     }
 
+    // ── Resolve voice profile style guide (non-blocking read) ────────────────
     let styleGuide: string | undefined;
     if (voiceProfileId) {
       const profile = await prisma.voiceProfile.findUnique({
         where: { id: voiceProfileId },
+        select: { userId: true, styleGuide: true },
       });
       if (profile && profile.userId === userId) {
-        const parsed = JSON.parse(profile.styleGuide);
-        styleGuide = parsed.styleGuide;
+        try {
+          const parsed = JSON.parse(profile.styleGuide);
+          styleGuide = parsed.styleGuide;
+        } catch {}
       }
     }
 
-    const articles = await generateMultipleArticles(
-      companyName,
-      companyType,
-      keywords,
-      tone,
-      numArticles,
-      language,
-      styleGuide
-    );
+    // ── Create GenerationJob record ───────────────────────────────────────────
+    const job = await prisma.generationJob.create({
+      data: {
+        userId,
+        status: "queued",
+        totalItems: numArticles,
+        payload: {
+          companyName,
+          companyType,
+          keywords,
+          tone,
+          numArticles,
+          language,
+          voiceProfileId: voiceProfileId ?? null,
+          clientId: clientId ?? null,
+          styleGuide: styleGuide ?? null,
+        },
+      },
+    });
 
-    if (articles.length === 0) {
-      return NextResponse.json(
-        { success: false, error: "Error generando artículos" },
-        { status: 500 }
-      );
-    }
-
-    const savedArticles = await Promise.all(
-      articles.map((article) =>
-        prisma.article.create({
-          data: {
-            userId,
-            title: article.title,
-            content: article.content,
-            keywords: JSON.stringify(article.keywords),
-            companyName,
-            companyType,
-            metaDescription: article.metaDescription,
-            readingTime: article.readingTime,
-            ...(clientId && { clientId }),
-          },
-        })
-      )
-    );
-
-    let remaining: number;
-    if (user.subscriptionStatus === "active") {
-      remaining = user.articlesLimitPerMonth - ((user.articlesUsedThisMonth || 0) + articles.length);
-    } else {
-      remaining = user.credits - articles.length;
-    }
+    // ── Send event to Inngest ─────────────────────────────────────────────────
+    await inngest.send({
+      name: "article/generate.requested",
+      data: {
+        jobId: job.id,
+        userId,
+        usedSubscription: usageCheck.usedSubscription ?? false,
+        articlesToCharge: numArticles,
+        payload: {
+          companyName,
+          companyType,
+          keywords,
+          tone,
+          numArticles,
+          language,
+          voiceProfileId,
+          clientId,
+          styleGuide,
+        },
+      } satisfies GenerateArticleEventData,
+    });
 
     return NextResponse.json(
       {
         success: true,
         data: {
-          articles: savedArticles,
-          articlesUsed: articles.length,
-          articlesRemaining: remaining,
+          jobId: job.id,
+          status: "queued",
+          totalItems: numArticles,
         },
       },
-      { status: 201 }
+      { status: 202 } // 202 Accepted — processing async
     );
   } catch (error) {
-    console.error("Error generando artículos:", error);
-    return NextResponse.json(
-      { success: false, error: "Error en el servidor" },
-      { status: 500 }
-    );
+    console.error("Error encolando generación de artículos:", error);
+    return NextResponse.json({ success: false, error: "Error en el servidor" }, { status: 500 });
   }
 }

@@ -70,9 +70,7 @@ export async function generateMultipleArticles(
       console.warn(`Error generando artículo ${i + 1}`);
     }
 
-    if (i < numArticles - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
+    // No artificial delay: Inngest handles backoff/retries at the job level.
   }
 
   return articles;

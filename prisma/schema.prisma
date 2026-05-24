@@ -42,6 +42,7 @@ model User {
   creditPurchases  CreditPurchase[]
   voiceProfiles    VoiceProfile[]
   clients          Client[]
+  generationJobs   GenerationJob[]
 
   @@map("users")
 }
@@ -73,6 +74,9 @@ model Article {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, clientId])
+  @@index([userId, publishedToWp])
   @@map("articles")
 }
 
@@ -89,7 +93,33 @@ model CreditPurchase {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
+  @@index([userId, createdAt(sort: Desc)])
   @@map("credit_purchases")
+}
+
+model GenerationJob {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status      String    @default("queued")   // "queued" | "running" | "completed" | "failed"
+  progress    Int       @default(0)          // 0-100
+  totalItems  Int       @default(1)
+  doneItems   Int       @default(0)
+
+  // Input payload stored as JSON for the Inngest function
+  payload     Json
+
+  // Output: array of saved article IDs
+  resultIds   Json?
+
+  error       String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("generation_jobs")
 }
 
 model VoiceProfile {

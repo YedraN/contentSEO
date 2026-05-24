@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
@@ -22,12 +22,31 @@ interface ClientOption {
   defaultLanguage: string;
 }
 
+interface GeneratedArticleStub {
+  id: string;
+  title: string;
+  createdAt: Date;
+}
+
+interface JobStatus {
+  id: string;
+  status: "queued" | "running" | "completed" | "failed";
+  progress: number;
+  totalItems: number;
+  doneItems: number;
+  error?: string | null;
+  articles?: GeneratedArticleStub[];
+}
+
 interface GeneratorFormProps {
   onSuccess?: (articles: any[]) => void;
 }
 
 export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [job, setJob] = useState<JobStatus | null>(null);
+  const pollRef = useRef<NodeJS.Timeout | null>(null);
+
   const [voiceProfiles, setVoiceProfiles] = useState<VoiceProfileOption[]>([]);
   const [clients, setClients] = useState<ClientOption[]>([]);
   const [formData, setFormData] = useState({
@@ -75,22 +94,73 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
 
     fetch("/api/voice/profiles")
       .then((r) => r.json())
-      .then((d) => {
-        if (d.success && d.data) setVoiceProfiles(d.data);
-      })
+      .then((d) => { if (d.success && d.data) setVoiceProfiles(d.data); })
       .catch(() => {});
 
     fetch("/api/clients")
       .then((r) => r.json())
-      .then((d) => {
-        if (d.success && d.data) setClients(d.data);
-      })
+      .then((d) => { if (d.success && d.data) setClients(d.data); })
       .catch(() => {});
   }, []);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  // ── Polling logic ────────────────────────────────────────────────────────
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, []);
+
+  const startPolling = useCallback(
+    (jobId: string) => {
+      stopPolling();
+      pollRef.current = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/generate/jobs/${jobId}`);
+          const data = await res.json();
+          if (!data.success) { stopPolling(); return; }
+
+          const jobData: JobStatus = data.data;
+          setJob(jobData);
+
+          if (jobData.status === "completed") {
+            stopPolling();
+            setIsSubmitting(false);
+            toast.success(
+              `${jobData.doneItems} artículo${jobData.doneItems !== 1 ? "s" : ""} generado${jobData.doneItems !== 1 ? "s" : ""} correctamente`
+            );
+            if (onSuccess && jobData.articles) {
+              onSuccess(jobData.articles);
+            }
+            // Reset form
+            setFormData((prev) => ({
+              ...prev,
+              companyName: "",
+              keywords: [],
+              keywordInput: "",
+              numArticles: 1,
+            }));
+            // Clear job display after a short delay
+            setTimeout(() => setJob(null), 3000);
+          } else if (jobData.status === "failed") {
+            stopPolling();
+            setIsSubmitting(false);
+            toast.error(jobData.error ?? "Error generando artículos");
+            setTimeout(() => setJob(null), 5000);
+          }
+        } catch {
+          // Network error — keep polling
+        }
+      }, 1500);
+    },
+    [stopPolling, onSuccess]
+  );
+
+  // Cleanup on unmount
+  useEffect(() => () => stopPolling(), [stopPolling]);
+
+  // ── Form handlers ────────────────────────────────────────────────────────
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -101,11 +171,7 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
   const addKeyword = () => {
     const keyword = formData.keywordInput.trim();
     if (keyword && !formData.keywords.includes(keyword)) {
-      setFormData((prev) => ({
-        ...prev,
-        keywords: [...prev.keywords, keyword],
-        keywordInput: "",
-      }));
+      setFormData((prev) => ({ ...prev, keywords: [...prev.keywords, keyword], keywordInput: "" }));
     }
   };
 
@@ -123,13 +189,13 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
       toast.error("El nombre de la empresa es requerido");
       return;
     }
-
     if (formData.keywords.length === 0) {
       toast.error("Debes agregar al menos una palabra clave");
       return;
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true);
+    setJob(null);
 
     try {
       const response = await fetch("/api/generate/article", {
@@ -150,35 +216,39 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
       const data = await response.json();
 
       if (!data.success) {
-        toast.error(data.error || "Error generando artículos");
+        toast.error(data.error || "Error iniciando la generación");
+        setIsSubmitting(false);
         return;
       }
 
-      toast.success(`${data.data.articles.length} artículo(s) generado(s)`);
-
-      if (onSuccess) {
-        onSuccess(data.data.articles);
-      }
-
-      setFormData((prev) => ({
-        ...prev,
-        companyName: "",
-        companyType: "SaaS",
-        keywords: [],
-        keywordInput: "",
-        tone: "professional",
-        numArticles: 1,
-      }));
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Error generando artículos");
-    } finally {
-      setIsLoading(false);
+      // 202 Accepted — job was created, start polling
+      const { jobId, totalItems } = data.data;
+      setJob({ id: jobId, status: "queued", progress: 0, totalItems, doneItems: 0 });
+      startPolling(jobId);
+    } catch {
+      toast.error("Error de conexión");
+      setIsSubmitting(false);
     }
   };
 
   const selectedLanguageLabel =
     LANGUAGE_OPTIONS.find((l) => l.value === formData.language)?.label ?? formData.language;
+
+  const isProcessing = isSubmitting || (job !== null && job.status !== "completed" && job.status !== "failed");
+
+  // ── Progress display ─────────────────────────────────────────────────────
+  const progressLabel =
+    job?.status === "queued"
+      ? "En cola…"
+      : job?.status === "running"
+      ? job.doneItems > 0
+        ? `Generando artículo ${job.doneItems + 1} de ${job.totalItems}…`
+        : "Iniciando generación…"
+      : job?.status === "completed"
+      ? `${job.doneItems} artículo${job.doneItems !== 1 ? "s" : ""} completados`
+      : job?.status === "failed"
+      ? "Error en la generación"
+      : `Generando ${formData.numArticles} artículo${formData.numArticles > 1 ? "s" : ""}…`;
 
   return (
     <Card hover>
@@ -194,6 +264,48 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
         </div>
       </div>
 
+      {/* ── Progress bar (shown while job is active) ───────────────────────── */}
+      {job && (
+        <div className={classNames(
+          "mb-6 p-4 rounded-xl border transition-all",
+          job.status === "failed"
+            ? "bg-red-50 border-red-200"
+            : job.status === "completed"
+            ? "bg-green-50 border-green-200"
+            : "bg-brand-50 border-brand-200"
+        )}>
+          <div className="flex items-center justify-between mb-2">
+            <span className={classNames(
+              "text-sm font-semibold",
+              job.status === "failed" ? "text-red-700" : job.status === "completed" ? "text-green-700" : "text-brand-700"
+            )}>
+              {progressLabel}
+            </span>
+            <span className="text-xs font-medium text-gray-500">
+              {job.status === "running" || job.status === "completed"
+                ? `${job.doneItems}/${job.totalItems}`
+                : ""}
+            </span>
+          </div>
+          <div className="w-full bg-white rounded-full h-2 overflow-hidden border border-gray-200">
+            <div
+              className={classNames(
+                "h-2 rounded-full transition-all duration-700 ease-out",
+                job.status === "failed"
+                  ? "bg-red-500"
+                  : job.status === "completed"
+                  ? "bg-green-500"
+                  : "bg-gradient-to-r from-brand-500 to-brand-600"
+              )}
+              style={{ width: `${job.status === "queued" ? 5 : job.progress}%` }}
+            />
+          </div>
+          {job.status === "failed" && job.error && (
+            <p className="text-xs text-red-600 mt-2">{job.error}</p>
+          )}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-5">
         {clients.length > 0 && (
           <div>
@@ -201,7 +313,8 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
             <select
               value={formData.clientId}
               onChange={(e) => loadClient(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200"
+              disabled={isProcessing}
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200 disabled:opacity-60"
             >
               <option value="">Sin cliente (escribe manualmente)</option>
               {clients.map((c) => (
@@ -219,6 +332,7 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
             onChange={handleInputChange}
             placeholder="Ej: Tech Solutions"
             required
+            disabled={isProcessing}
           />
 
           <div>
@@ -227,7 +341,8 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
               name="companyType"
               value={formData.companyType}
               onChange={handleInputChange}
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200"
+              disabled={isProcessing}
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200 disabled:opacity-60"
             >
               {COMPANY_TYPES.map((type) => (
                 <option key={type} value={type}>{type}</option>
@@ -244,8 +359,9 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
               onChange={(e) => setFormData((prev) => ({ ...prev, keywordInput: e.target.value }))}
               onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addKeyword(); } }}
               placeholder="Escribe una palabra clave y presiona Enter"
+              disabled={isProcessing}
             />
-            <Button type="button" variant="secondary" onClick={addKeyword} className="whitespace-nowrap shrink-0">
+            <Button type="button" variant="secondary" onClick={addKeyword} disabled={isProcessing} className="whitespace-nowrap shrink-0">
               Agregar
             </Button>
           </div>
@@ -259,7 +375,8 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
                 <button
                   type="button"
                   onClick={() => removeKeyword(index)}
-                  className="w-4 h-4 rounded-full bg-brand-200 hover:bg-brand-300 flex items-center justify-center text-brand-700 text-xs transition-colors"
+                  disabled={isProcessing}
+                  className="w-4 h-4 rounded-full bg-brand-200 hover:bg-brand-300 flex items-center justify-center text-brand-700 text-xs transition-colors disabled:opacity-50"
                 >
                   ×
                 </button>
@@ -275,7 +392,8 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
               name="language"
               value={formData.language}
               onChange={handleInputChange}
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200"
+              disabled={isProcessing}
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200 disabled:opacity-60"
             >
               {LANGUAGE_OPTIONS.map((l) => (
                 <option key={l.value} value={l.value}>{l.label}</option>
@@ -289,7 +407,8 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
               name="tone"
               value={formData.tone}
               onChange={handleInputChange}
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200"
+              disabled={isProcessing}
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200 disabled:opacity-60"
             >
               {CONTENT_TONE_OPTIONS.map((tone) => (
                 <option key={tone} value={tone}>
@@ -309,8 +428,9 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
                   key={n}
                   type="button"
                   onClick={() => setFormData((prev) => ({ ...prev, numArticles: n }))}
+                  disabled={isProcessing}
                   className={classNames(
-                    "w-10 h-10 rounded-xl text-sm font-semibold transition-all duration-200",
+                    "w-10 h-10 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50",
                     formData.numArticles === n
                       ? "bg-brand-600 text-white shadow-md"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -329,7 +449,8 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
             <select
               value={formData.voiceProfileId}
               onChange={(e) => setFormData((prev) => ({ ...prev, voiceProfileId: e.target.value }))}
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200"
+              disabled={isProcessing}
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all duration-200 disabled:opacity-60"
             >
               <option value="">Estilo predeterminado</option>
               {voiceProfiles.map((vp) => (
@@ -344,8 +465,9 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
           </div>
         )}
 
-        <div className={classNames("p-4 rounded-xl bg-gradient-to-r from-brand-50 to-purple-50 border border-brand-100",
-          isLoading && "animate-pulse"
+        <div className={classNames(
+          "p-4 rounded-xl bg-gradient-to-r from-brand-50 to-purple-50 border border-brand-100",
+          isProcessing && "opacity-60"
         )}>
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-semibold text-gray-900">Resumen</span>
@@ -358,15 +480,17 @@ export default function GeneratorForm({ onSuccess }: GeneratorFormProps) {
 
         <Button
           type="submit"
-          isLoading={isLoading}
-          disabled={isLoading || formData.keywords.length === 0}
+          isLoading={isProcessing}
+          disabled={isProcessing || formData.keywords.length === 0}
           className="w-full text-base py-3"
         >
-          {isLoading ? "Generando artículos..." : `Generar ${formData.numArticles} artículo${formData.numArticles > 1 ? "s" : ""}`}
+          {isProcessing
+            ? progressLabel
+            : `Generar ${formData.numArticles} artículo${formData.numArticles > 1 ? "s" : ""}`}
         </Button>
 
         <p className="text-xs text-gray-400 text-center">
-          Esto puede tomar 10-30 segundos por artículo
+          La generación ocurre en segundo plano — puedes navegar mientras esperas
         </p>
       </form>
     </Card>

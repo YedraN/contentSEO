@@ -35,6 +35,7 @@ describe("POST /api/articles/[id]/publish-to-wordpress", () => {
 
   const mockUser = {
     id: "user-1",
+    subscriptionPlan: "pro",
     wordpressConnected: true,
     wordpressUrl: "https://misitio.com",
     wordpressUsername: "admin",
@@ -63,7 +64,7 @@ describe("POST /api/articles/[id]/publish-to-wordpress", () => {
     const body = await res.json();
 
     expect(res.status).toBe(401);
-    expect(body.error).toBe("Token inválido");
+    expect(body.error).toBe("No autorizado");
   });
 
   it("debe retornar 404 si el usuario no existe", async () => {
