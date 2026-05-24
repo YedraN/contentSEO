@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import { parseKeywords } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Article {
   id: string;
@@ -17,17 +18,27 @@ interface Stats {
   articlesTotal: number;
 }
 
+const PLAN_LABELS: Record<string, string> = {
+  starter: "Starter",
+  pro: "Pro",
+  agency: "Agency",
+};
+
 export default function DashboardPage() {
+  const { user } = useAuth();
   const [stats, setStats] = useState<Stats>({ credits: 0, articlesTotal: 0 });
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [agencyName, setAgencyName] = useState("");
-  const [userName, setUserName] = useState("");
+
+  // Derive display name from user context (no more localStorage)
+  const displayName =
+    user?.agencyName || user?.name || "Tu agencia";
+
+  const plan = user?.subscriptionPlan;
+  const planLabel = plan ? PLAN_LABELS[plan] ?? plan : null;
+  const hasActivePlan = !!plan && user?.subscriptionStatus === "active";
 
   useEffect(() => {
-    setAgencyName(localStorage.getItem("agencyName") || "");
-    setUserName(localStorage.getItem("userName") || "");
-
     const fetchData = async () => {
       try {
         const [creditsRes, articlesRes] = await Promise.all([
@@ -68,7 +79,7 @@ export default function DashboardPage() {
         <div>
           <p className="text-sm text-gray-500 mb-1">{greeting()}</p>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-            {agencyName || userName || "Tu agencia"}
+            {displayName}
           </h1>
         </div>
         <Link href="/generator">
@@ -100,10 +111,14 @@ export default function DashboardPage() {
           },
           {
             label: "Plan activo",
-            value: stats.credits > 0 ? "Activo" : "Sin plan",
-            sub: stats.credits > 0 ? `${stats.credits} crédito${stats.credits !== 1 ? "s" : ""} disponible${stats.credits !== 1 ? "s" : ""}` : "Recarga para empezar",
-            accent: stats.credits > 0 ? "from-emerald-500 to-emerald-600" : "from-gray-400 to-gray-500",
-            action: { href: "/credits", label: stats.credits > 0 ? "Ver plan" : "Ver planes" },
+            value: hasActivePlan ? planLabel! : "Sin plan",
+            sub: hasActivePlan
+              ? `${stats.credits} crédito${stats.credits !== 1 ? "s" : ""} disponible${stats.credits !== 1 ? "s" : ""}`
+              : "Recarga para empezar",
+            accent: hasActivePlan
+              ? "from-emerald-500 to-emerald-600"
+              : "from-gray-400 to-gray-500",
+            action: { href: "/credits", label: hasActivePlan ? "Ver plan" : "Ver planes" },
           },
         ].map((card, i) => (
           <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3">
