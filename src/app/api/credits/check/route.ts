@@ -16,6 +16,11 @@ export async function GET(request: NextRequest) {
         data: {
           credits: auth.user.credits,
           name: auth.user.name,
+          subscriptionPlan: auth.user.subscriptionPlan,
+          subscriptionStatus: auth.user.subscriptionStatus,
+          articlesLimitPerMonth: auth.user.articlesLimitPerMonth,
+          articlesUsedThisMonth: auth.user.articlesUsedThisMonth,
+          billingCycleEnd: auth.user.billingCycleEnd,
         },
       },
       { status: 200 }

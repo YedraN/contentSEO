@@ -7,9 +7,11 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { validatePassword } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { refresh } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -63,11 +65,8 @@ export default function RegisterPage() {
         return;
       }
 
-      if (data.data?.name) {
-        localStorage.setItem("userName", data.data.name);
-        localStorage.setItem("isLoggedIn", "true");
-      }
       toast.success("¡Cuenta creada! Bienvenido a FeatSEO");
+      await refresh();
       router.push("/dashboard");
     } catch {
       toast.error("Error al crear la cuenta. Inténtalo de nuevo.");

@@ -28,6 +28,10 @@ export default function ArticlePreview({ article }: ArticlePreviewProps) {
   const [showWpModal, setShowWpModal] = useState(false);
   const [wpStatus, setWpStatus] = useState("draft");
   const [isPublishing, setIsPublishing] = useState(false);
+  const [wpCategories, setWpCategories] = useState<{ id: number; name: string }[]>([]);
+  const [wpTags, setWpTags] = useState<{ id: number; name: string }[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+  const [tagInput, setTagInput] = useState("");
 
   const [localTitle, setLocalTitle] = useState(article.title);
   const [localContent, setLocalContent] = useState(article.content);
@@ -48,9 +52,21 @@ export default function ArticlePreview({ article }: ArticlePreviewProps) {
       fetch("/api/credits/check").then((r) => r.json()),
     ])
       .then(([wpData, creditsData]) => {
-        setWpConnected(wpData.data?.connected ?? false);
-        if (creditsData.data?.subscriptionPlan) {
-          setSubscriptionPlan(creditsData.data.subscriptionPlan);
+        const connected = wpData.data?.connected ?? false;
+        const plan = creditsData.data?.subscriptionPlan ?? null;
+        setWpConnected(connected);
+        setSubscriptionPlan(plan);
+
+        if (connected && hasFeature(plan, "wordpress")) {
+          fetch("/api/wordpress/taxonomies")
+            .then((r) => r.json())
+            .then((taxData) => {
+              if (taxData.success) {
+                setWpCategories(taxData.data.categories ?? []);
+                setWpTags(taxData.data.tags ?? []);
+              }
+            })
+            .catch(() => {});
         }
       })
       .catch(() => {});
@@ -124,14 +140,34 @@ export default function ArticlePreview({ article }: ArticlePreviewProps) {
   const handlePublishToWordPress = async () => {
     setIsPublishing(true);
     try {
+      const tagIds = tagInput
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean)
+        .map((name) => wpTags.find((t) => t.name.toLowerCase() === name.toLowerCase())?.id)
+        .filter((id): id is number => id !== undefined);
+
       const res = await fetch(`/api/articles/${article.id}/publish-to-wordpress`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: wpStatus, categories: [], tags: [] }),
+        body: JSON.stringify({
+          status: wpStatus,
+          categories: selectedCategories,
+          tags: tagIds,
+        }),
       });
       const data = await res.json();
       if (data.success) {
-        toast.success("Publicado en WordPress");
+        toast.success(
+          <span>
+            Publicado en WordPress.{" "}
+            {data.data?.postUrl && (
+              <a href={data.data.postUrl} target="_blank" rel="noreferrer" className="underline font-semibold">
+                Ver post
+              </a>
+            )}
+          </span>
+        );
         setShowWpModal(false);
       } else {
         toast.error(data.error || "Error publicando en WordPress");
@@ -262,7 +298,7 @@ export default function ArticlePreview({ article }: ArticlePreviewProps) {
       {/* WordPress Modal */}
       {showWpModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-xl max-w-md w-full p-6 animate-fade-in">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-xl max-w-md w-full p-6 animate-fade-in max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Publicar en WordPress</h3>
 
             <div className="space-y-4 mb-6">
@@ -277,6 +313,63 @@ export default function ArticlePreview({ article }: ArticlePreviewProps) {
                   <option value="publish">Publicado</option>
                 </select>
               </div>
+
+              {wpCategories.length > 0 && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Categorías</label>
+                  <div className="border-2 border-gray-200 rounded-xl p-3 max-h-40 overflow-y-auto space-y-1.5">
+                    {wpCategories.map((cat) => (
+                      <label key={cat.id} className="flex items-center gap-2.5 cursor-pointer hover:bg-gray-50 rounded-lg px-1 py-0.5">
+                        <input
+                          type="checkbox"
+                          checked={selectedCategories.includes(cat.id)}
+                          onChange={(e) => {
+                            setSelectedCategories((prev) =>
+                              e.target.checked ? [...prev, cat.id] : prev.filter((id) => id !== cat.id)
+                            );
+                          }}
+                          className="w-4 h-4 rounded text-brand-600 border-gray-300 focus:ring-brand-500"
+                        />
+                        <span className="text-sm text-gray-700">{cat.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {wpTags.length > 0 && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                    Etiquetas{" "}
+                    <span className="font-normal text-gray-400">(separadas por coma)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    placeholder={wpTags.slice(0, 3).map((t) => t.name).join(", ")}
+                    className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:border-brand-500 focus:ring-brand-100 transition-all"
+                  />
+                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                    {wpTags.slice(0, 8).map((tag) => (
+                      <button
+                        key={tag.id}
+                        type="button"
+                        onClick={() => {
+                          setTagInput((prev) => {
+                            const existing = prev.split(",").map((t) => t.trim()).filter(Boolean);
+                            if (existing.includes(tag.name)) return prev;
+                            return [...existing, tag.name].join(", ");
+                          });
+                        }}
+                        className="text-xs bg-gray-100 hover:bg-brand-50 hover:text-brand-700 text-gray-600 px-2 py-1 rounded-lg transition-colors"
+                      >
+                        + {tag.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-2">

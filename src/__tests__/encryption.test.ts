@@ -1,51 +1,62 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import { encrypt, decrypt } from "@/lib/encryption";
 
-describe("encryption", () => {
-  it("debe encriptar y desencriptar correctamente", () => {
+beforeAll(() => {
+  process.env.ENCRYPTION_KEY = "test_key_for_unit_tests_32chars_x";
+});
+
+describe("encryption v2 (AES-256-GCM)", () => {
+  it("encripta y desencripta correctamente", () => {
     const original = "my_secret_password_123";
-    const encrypted = encrypt(original);
-    const decrypted = decrypt(encrypted);
-    expect(decrypted).toBe(original);
+    expect(decrypt(encrypt(original))).toBe(original);
   });
 
-  it("debe manejar strings vacíos", () => {
-    const encrypted = encrypt("");
-    const decrypted = decrypt(encrypted);
-    expect(decrypted).toBe("");
+  it("produce outputs diferentes para el mismo input (IV aleatorio)", () => {
+    const enc1 = encrypt("hello");
+    const enc2 = encrypt("hello");
+    expect(enc1).not.toBe(enc2);
+    expect(decrypt(enc1)).toBe("hello");
+    expect(decrypt(enc2)).toBe("hello");
   });
 
-  it("debe manejar caracteres especiales", () => {
+  it("maneja strings vacíos", () => {
+    expect(decrypt(encrypt(""))).toBe("");
+  });
+
+  it("maneja caracteres especiales y unicode", () => {
     const original = "contraseña!@#$%^&*()_+ñáéíóú";
-    const encrypted = encrypt(original);
-    const decrypted = decrypt(encrypted);
-    expect(decrypted).toBe(original);
+    expect(decrypt(encrypt(original))).toBe(original);
   });
 
-  it("debe manejar strings largos", () => {
+  it("maneja strings largos", () => {
     const original = "a".repeat(1000);
-    const encrypted = encrypt(original);
-    const decrypted = decrypt(encrypted);
-    expect(decrypted).toBe(original);
+    expect(decrypt(encrypt(original))).toBe(original);
   });
 
-  it("debe manejar strings con saltos de línea", () => {
+  it("maneja strings con saltos de línea", () => {
     const original = "line1\nline2\r\nline3";
-    const encrypted = encrypt(original);
-    const decrypted = decrypt(encrypted);
-    expect(decrypted).toBe(original);
+    expect(decrypt(encrypt(original))).toBe(original);
   });
 
-  it("debe retornar string vacío al desencriptar datos inválidos", () => {
+  it("retorna string vacío para datos inválidos", () => {
     expect(decrypt("")).toBe("");
     expect(decrypt("invalid-format")).toBe("");
-    expect(decrypt("not-a-valid-hex:data")).toBe("");
-    expect(decrypt("0000000000000000:nothex")).toBe("");
+    expect(decrypt("2:bad:data")).toBe("");
   });
+});
 
-  it("debe producir diferentes outputs para diferentes inputs", () => {
-    const enc1 = encrypt("hello");
-    const enc2 = encrypt("world");
-    expect(enc1).not.toBe(enc2);
+describe("backwards compatibility con v1 (AES-256-CBC legacy)", () => {
+  it("desencripta valores en formato v1 (ivHex:ciphertext)", () => {
+    // Generar un valor legacy con la implementación v1 para simular BD antigua
+    const crypto = require("crypto");
+    const key = process.env.ENCRYPTION_KEY!;
+    const legacyKey = crypto.scryptSync(key, "salt", 32);
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv("aes-256-cbc", legacyKey, iv);
+    let ciphertext = cipher.update("legacy_password", "utf-8", "hex");
+    ciphertext += cipher.final("hex");
+    const legacyEncrypted = `${iv.toString("hex")}:${ciphertext}`;
+
+    expect(decrypt(legacyEncrypted)).toBe("legacy_password");
   });
 });

@@ -45,7 +45,9 @@
       "Bash(rm -rf .next node_modules/.cache)",
       "Bash(npm ci *)",
       "Bash(git commit -m 'Force Vercel to skip build cache with dynamic build ID *)",
-      "Bash(del *)"
+      "Bash(del *)",
+      "Bash(npx vitest *)",
+      "Bash(git commit -m 'fix: auth navbar + wordpress completo \\(fases 1 y 2\\) *)"
     ]
   }
 }

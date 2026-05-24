@@ -113,13 +113,17 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = await verifyAuth(request);
-    if (!userId) {
+    const auth = await getAuthenticatedUser(request);
+    if (!auth) {
       return NextResponse.json({ success: false, error: "No autorizado" }, { status: 401 });
     }
 
+    if (!hasFeature(auth.user.subscriptionPlan, "wordpress")) {
+      return NextResponse.json({ success: true, data: { connected: false, url: null } });
+    }
+
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: auth.userId },
       select: { wordpressConnected: true, wordpressUrl: true },
     });
 

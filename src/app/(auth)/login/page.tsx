@@ -6,9 +6,11 @@ import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import toast from "react-hot-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { refresh } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [generalError, setGeneralError] = useState("");
@@ -42,11 +44,8 @@ export default function LoginPage() {
         return;
       }
 
-      if (data.data?.name) {
-        localStorage.setItem("userName", data.data.name);
-        localStorage.setItem("isLoggedIn", "true");
-      }
       toast.success("Bienvenido de nuevo");
+      await refresh();
       router.push("/dashboard");
     } catch {
       setGeneralError("Error de conexión. Inténtalo de nuevo.");
