@@ -6,6 +6,7 @@ interface AuthUser {
   id: string;
   email: string;
   name: string | null;
+  agencyName: string | null;
   credits: number;
   subscriptionPlan: string | null;
   subscriptionStatus: string | null;

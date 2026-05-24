@@ -138,6 +138,7 @@ export async function getUserById(userId: string) {
       id: true,
       email: true,
       name: true,
+      agencyName: true,
       credits: true,
       createdAt: true,
       subscriptionPlan: true,

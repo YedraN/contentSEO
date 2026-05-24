@@ -47,6 +47,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (user && !isLoading) {
       setName(user.name || "");
+      setAgencyName(user.agencyName || "");
       setDefaultLanguage(user.defaultLanguage || "es");
       setDefaultTone(user.defaultTone || "professional");
     }

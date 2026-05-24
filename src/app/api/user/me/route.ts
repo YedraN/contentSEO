@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
         id: user.id,
         email: user.email,
         name: user.name,
+        agencyName: user.agencyName,
         credits: user.credits,
         subscriptionPlan: user.subscriptionPlan,
         subscriptionStatus: user.subscriptionStatus,
