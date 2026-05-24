@@ -40,11 +40,15 @@ export default function ArticlePage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 animate-pulse space-y-4">
-          <div className="h-8 bg-gray-100 rounded w-3/4" />
-          <div className="h-4 bg-gray-100 rounded w-full" />
-          <div className="h-4 bg-gray-100 rounded w-full" />
+      <div className="min-h-screen bg-gray-50 pt-20 lg:pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 animate-pulse space-y-4">
+            <div className="h-8 bg-gray-100 rounded w-3/4" />
+            <div className="h-4 bg-gray-100 rounded w-full" />
+            <div className="h-4 bg-gray-100 rounded w-5/6" />
+            <div className="h-4 bg-gray-100 rounded w-full" />
+            <div className="h-4 bg-gray-100 rounded w-4/6" />
+          </div>
         </div>
       </div>
     );
@@ -52,15 +56,17 @@ export default function ArticlePage() {
 
   if (!article) {
     return (
-      <div className="text-center py-12">
+      <div className="min-h-screen bg-gray-50 pt-20 lg:pt-24 pb-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
         <p className="text-gray-500">Artículo no encontrado</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <ArticlePreview article={article} />
+    <div className="min-h-screen bg-gray-50 pt-20 lg:pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <ArticlePreview article={article} />
+      </div>
     </div>
   );
 }
