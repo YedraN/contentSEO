@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyAuth } from "@/lib/api-auth";
 
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: profiles });
   } catch (error) {
-    console.error("Error listando perfiles de voz:", error);
+    console.error("Error listando perfiles de voz:", (error as Error).message);
     return NextResponse.json({ success: false, error: "Error en el servidor" }, { status: 500 });
   }
 }
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error obteniendo perfil de voz:", error);
+    console.error("Error obteniendo perfil de voz:", (error as Error).message);
     return NextResponse.json({ success: false, error: "Error en el servidor" }, { status: 500 });
   }
 }

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { deductCredits } from "@/lib/auth";
 import { verifyAuth } from "@/lib/api-auth";
 
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error deduciendo créditos:", error);
+    console.error("Error deduciendo créditos:", (error as Error).message);
     return NextResponse.json(
       { success: false, error: "Error en el servidor" },
       { status: 500 }

@@ -1,8 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { loginUser } from "@/lib/auth";
+import { checkRateLimit, getClientIp } from "@/lib/ratelimit";
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const rl = checkRateLimit(`login:${ip}`, 10, 15 * 60 * 1000);
+    if (!rl.success) {
+      return NextResponse.json(
+        { success: false, error: "Demasiados intentos. Espera 15 minutos." },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+      );
+    }
+
     const { email, password } = await request.json();
 
     if (!email || !password) {
@@ -41,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error("Error en login:", error);
+    console.error("Error en login:", (error as Error).message);
     return NextResponse.json(
       { success: false, error: "Error en el servidor" },
       { status: 500 }

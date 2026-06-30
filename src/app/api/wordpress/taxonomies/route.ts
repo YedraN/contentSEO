@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { decrypt } from "@/lib/encryption";
 import { getWordPressCategories, getWordPressTags } from "@/lib/wordpress";
 import { prisma } from "@/lib/db";
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 
     const config = {
       url: user.wordpressUrl,
-      username: user.wordpressUsername,
+      username: decrypt(user.wordpressUsername),
       password: decrypt(user.wordpressPassword),
     };
 
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: { categories, tags } });
   } catch (error) {
-    console.error("Error obteniendo taxonomías WordPress:", error);
+    console.error("Error obteniendo taxonomías WordPress:", (error as Error).message);
     return NextResponse.json({ success: false, error: "Error en el servidor" }, { status: 500 });
   }
 }

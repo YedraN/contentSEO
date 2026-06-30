@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { checkAndIncrementUsage } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { inngest } from "@/lib/inngest";
@@ -43,13 +43,13 @@ export async function POST(request: NextRequest) {
 
     const { userId } = auth;
 
-    // ── Debit credits atomically BEFORE creating the job ─────────────────────
+    // â”€â”€ Debit credits atomically BEFORE creating the job â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const usageCheck = await checkAndIncrementUsage(userId, numArticles);
     if (!usageCheck.success) {
       return NextResponse.json({ success: false, error: usageCheck.error }, { status: 400 });
     }
 
-    // ── Resolve voice profile style guide (non-blocking read) ────────────────
+    // â”€â”€ Resolve voice profile style guide (non-blocking read) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     let styleGuide: string | undefined;
     if (voiceProfileId) {
       const profile = await prisma.voiceProfile.findUnique({
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Create GenerationJob record ───────────────────────────────────────────
+    // â”€â”€ Create GenerationJob record â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const job = await prisma.generationJob.create({
       data: {
         userId,
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // ── Send event to Inngest ─────────────────────────────────────────────────
+    // â”€â”€ Send event to Inngest â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     await inngest.send({
       name: "article/generate.requested",
       data: {
@@ -115,10 +115,10 @@ export async function POST(request: NextRequest) {
           totalItems: numArticles,
         },
       },
-      { status: 202 } // 202 Accepted — processing async
+      { status: 202 } // 202 Accepted â€” processing async
     );
   } catch (error) {
-    console.error("Error encolando generación de artículos:", error);
+    console.error("Error encolando generación de artículos:", (error as Error).message);
     return NextResponse.json({ success: false, error: "Error en el servidor" }, { status: 500 });
   }
 }

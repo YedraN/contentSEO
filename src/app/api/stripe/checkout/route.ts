@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createCheckoutSession, SUBSCRIPTION_PLANS } from "@/lib/stripe";
 import { verifyAuth } from "@/lib/api-auth";
 
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error en checkout:", error);
+    console.error("Error en checkout:", (error as Error).message);
     return NextResponse.json(
       { success: false, error: "Error en el servidor" },
       { status: 500 }

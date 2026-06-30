@@ -4,11 +4,14 @@ import { PLANS } from "./plans";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export function verifyWebhookSignature(body: string, signature: string): Stripe.Event | null {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret) {
+    throw new Error("STRIPE_WEBHOOK_SECRET is not set — webhook verification cannot proceed");
+  }
   try {
-    const secret = process.env.STRIPE_WEBHOOK_SECRET || "";
     return stripe.webhooks.constructEvent(body, signature, secret) as Stripe.Event;
   } catch (error) {
-    console.error("Error verificando webhook:", error);
+    console.error("Error verificando webhook:", (error as Error).message);
     return null;
   }
 }

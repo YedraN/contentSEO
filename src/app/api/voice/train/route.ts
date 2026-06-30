@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { analyzeWritingStyle } from "@/lib/voice";
 import { prisma } from "@/lib/db";
 import { verifyAuth } from "@/lib/api-auth";
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error entrenando voz:", error);
+    console.error("Error entrenando voz:", (error as Error).message);
     return NextResponse.json({ success: false, error: "Error en el servidor" }, { status: 500 });
   }
 }

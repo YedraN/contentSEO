@@ -17,8 +17,8 @@ export async function comparePasswords(
   return bcryptjs.compare(password, hash);
 }
 
-export async function createToken(userId: string): Promise<string> {
-  return new SignJWT({ userId })
+export async function createToken(userId: string, sessionVersion: number = 1): Promise<string> {
+  return new SignJWT({ userId, sv: sessionVersion })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime(JWT_EXPIRATION)
     .sign(getSecret());
@@ -26,10 +26,10 @@ export async function createToken(userId: string): Promise<string> {
 
 export async function verifyToken(
   token: string
-): Promise<{ userId: string } | null> {
+): Promise<{ userId: string; sv?: number } | null> {
   try {
     const { payload } = await jwtVerify(token, getSecret());
-    return payload as unknown as { userId: string };
+    return payload as unknown as { userId: string; sv?: number };
   } catch {
     return null;
   }
@@ -73,6 +73,7 @@ export async function registerUser(
         name,
         agencyName: agencyName || null,
         credits: 1, // 1 crédito de prueba
+        sessionVersion: 1,
       },
     });
 
@@ -116,8 +117,8 @@ export async function loginUser(
     return { success: false, error: "Email o contraseña incorrectos" };
   }
 
-  // Crear token
-  const token = await createToken(user.id);
+  // Crear token con sessionVersion para permitir invalidación futura
+  const token = await createToken(user.id, user.sessionVersion ?? 1);
 
   return {
     success: true,

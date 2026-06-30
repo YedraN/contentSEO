@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAuthenticatedUser } from "@/lib/api-auth";
 
@@ -36,7 +36,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
-    console.error("Error actualizando preferencias:", error);
+    console.error("Error actualizando preferencias:", (error as Error).message);
     return NextResponse.json({ success: false, error: "Error en el servidor" }, { status: 500 });
   }
 }

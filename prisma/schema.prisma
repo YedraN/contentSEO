@@ -38,11 +38,15 @@ model User {
   wordpressPassword    String?
   wordpressConnected   Boolean @default(false)
 
+  // Incremented on password change to invalidate existing JWTs
+  sessionVersion       Int     @default(1)
+
   articles         Article[]
   creditPurchases  CreditPurchase[]
   voiceProfiles    VoiceProfile[]
   clients          Client[]
   generationJobs   GenerationJob[]
+  auditLogs        AuditLog[]
 
   @@map("users")
 }
@@ -151,4 +155,18 @@ model Client {
   articles      Article[]
 
   @@map("clients")
+}
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action      String    // e.g. "password_changed", "wp_credentials_saved", "wp_published"
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("audit_logs")
 }

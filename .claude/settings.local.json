@@ -58,7 +58,10 @@
       "PowerShell(New-Item *)",
       "Bash(node -e \"const i = require\\('./node_modules/inngest'\\); console.log\\(Object.keys\\(i\\)\\)\")",
       "Bash(node -e ' *)",
-      "Bash(git commit -m 'feat: generacion async con Inngest + fix race conditions creditos \\(fase 3\\) *)"
+      "Bash(git commit -m 'feat: generacion async con Inngest + fix race conditions creditos \\(fase 3\\) *)",
+      "mcp__plugin_supabase_supabase__list_projects",
+      "mcp__plugin_supabase_supabase__execute_sql",
+      "mcp__plugin_supabase_supabase__apply_migration"
     ]
   }
 }

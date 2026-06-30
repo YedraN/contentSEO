@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { hasFeature } from "@/lib/plans";
 import { verifyAuth, getAuthenticatedUser } from "@/lib/api-auth";
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error("Error listando clientes:", error);
+    console.error("Error listando clientes:", (error as Error).message);
     return NextResponse.json({ success: false, error: "Error en el servidor" }, { status: 500 });
   }
 }
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: client }, { status: 201 });
   } catch (error) {
-    console.error("Error creando cliente:", error);
+    console.error("Error creando cliente:", (error as Error).message);
     return NextResponse.json({ success: false, error: "Error en el servidor" }, { status: 500 });
   }
 }

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { testWordPressConnection } from "@/lib/wordpress";
 import { decrypt } from "@/lib/encryption";
 import { prisma } from "@/lib/db";
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     const isConnected = await testWordPressConnection({
       url: user.wordpressUrl,
-      username: user.wordpressUsername,
+      username: decrypt(user.wordpressUsername),
       password: decrypt(user.wordpressPassword),
     });
 
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error("Error testeando conexión WordPress:", error);
+    console.error("Error testeando conexión WordPress:", (error as Error).message);
     return NextResponse.json({ success: false, error: "Error en el servidor" }, { status: 500 });
   }
 }

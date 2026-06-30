@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyAuth } from "@/lib/api-auth";
 
@@ -12,8 +12,8 @@ export async function GET(request: NextRequest) {
     }
 
     const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get("page") || "1");
-    const limit = parseInt(url.searchParams.get("limit") || "10");
+    const page = Math.max(1, parseInt(url.searchParams.get("page") || "1") || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "10") || 10));
     const skip = (page - 1) * limit;
     const clientFilter = url.searchParams.get("clientId") || "";
 
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error listando artículos:", error);
+    console.error("Error listando artículos:", (error as Error).message);
     return NextResponse.json(
       { success: false, error: "Error en el servidor" },
       { status: 500 }

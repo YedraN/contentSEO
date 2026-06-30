@@ -54,7 +54,7 @@ export function decrypt(encryptedText: string): string {
     let decrypted = decipher.update(ciphertext, "hex", "utf-8");
     decrypted += decipher.final("utf-8");
     return decrypted;
-  } catch {
-    return "";
+  } catch (error) {
+    throw new Error(`Decryption failed: ${(error as Error).message}`);
   }
 }

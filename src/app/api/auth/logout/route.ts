@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error("Error en logout:", error);
+    console.error("Error en logout:", (error as Error).message);
     return NextResponse.json(
       { success: false, error: "Error en el servidor" },
       { status: 500 }

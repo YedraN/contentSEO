@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { encrypt, decrypt } from "@/lib/encryption";
+import { encrypt } from "@/lib/encryption";
 import { testWordPressConnection } from "@/lib/wordpress";
 import { prisma } from "@/lib/db";
 import { hasFeature } from "@/lib/plans";
@@ -24,17 +24,18 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const isConnected = await testWordPressConnection({
+      if (!wordpressUrl || !wordpressUsername || !wordpressPassword) {
+        return NextResponse.json({ success: false, error: "Faltan datos para probar la conexión" }, { status: 400 });
+      }
+
+      const result = await testWordPressConnection({
         url: wordpressUrl,
         username: wordpressUsername,
         password: wordpressPassword,
       });
 
-      if (!isConnected) {
-        return NextResponse.json(
-          { success: false, error: "No se pudo conectar. Verifica URL y credenciales." },
-          { status: 400 }
-        );
+      if (!result.success) {
+        return NextResponse.json({ success: false, error: result.error }, { status: 400 });
       }
 
       return NextResponse.json({ success: true, message: "Conexión exitosa" });
@@ -53,34 +54,39 @@ export async function POST(request: NextRequest) {
       }
 
       if (!wordpressUrl || !wordpressUsername || !wordpressPassword) {
-        return NextResponse.json(
-          { success: false, error: "Faltan datos requeridos" },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, error: "Faltan datos requeridos" }, { status: 400 });
       }
 
-      const isConnected = await testWordPressConnection({
+      const result = await testWordPressConnection({
         url: wordpressUrl,
         username: wordpressUsername,
         password: wordpressPassword,
       });
 
-      if (!isConnected) {
-        return NextResponse.json(
-          { success: false, error: "No se pudo conectar a WordPress" },
-          { status: 400 }
-        );
+      if (!result.success) {
+        return NextResponse.json({ success: false, error: result.error }, { status: 400 });
       }
 
       await prisma.user.update({
         where: { id: auth.userId },
         data: {
           wordpressUrl,
-          wordpressUsername,
+          wordpressUsername: encrypt(wordpressUsername),
           wordpressPassword: encrypt(wordpressPassword),
           wordpressConnected: true,
         },
       });
+
+      const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+      await prisma.auditLog.create({
+        data: {
+          userId: auth.userId,
+          action: "wp_credentials_saved",
+          ipAddress: ip,
+          userAgent: request.headers.get("user-agent") ?? null,
+          metadata: { url: wordpressUrl },
+        },
+      }).catch(() => {});
 
       return NextResponse.json({ success: true, message: "Credenciales guardadas" });
     }
@@ -106,7 +112,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: false, error: "Acción no válida" }, { status: 400 });
   } catch (error) {
-    console.error("Error gestionando credenciales WordPress:", error);
+    console.error("Error gestionando credenciales WordPress:", (error as Error).message);
     return NextResponse.json({ success: false, error: "Error en el servidor" }, { status: 500 });
   }
 }
@@ -135,7 +141,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error obteniendo status WordPress:", error);
+    console.error("Error obteniendo status WordPress:", (error as Error).message);
     return NextResponse.json({ success: false, error: "Error en el servidor" }, { status: 500 });
   }
 }

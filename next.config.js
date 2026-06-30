@@ -1,8 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Force rebuild without cache
   generateBuildId: async () => {
     return `build-${Date.now()}`;
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "2mb",
+    },
   },
 };
 

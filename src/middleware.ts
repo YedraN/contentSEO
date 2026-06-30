@@ -3,6 +3,15 @@ import { jwtVerify } from "jose";
 
 const getSecret = () => new TextEncoder().encode(process.env.JWT_SECRET!);
 
+const SECURITY_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "X-XSS-Protection": "1; mode=block",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+};
+
 async function verifyToken(token: string): Promise<{ userId: string } | null> {
   try {
     const { payload } = await jwtVerify(token, getSecret());
@@ -51,10 +60,14 @@ export async function middleware(request: NextRequest) {
     if (token) {
       const decoded = await verifyToken(token);
       if (decoded) {
-        return NextResponse.redirect(new URL("/dashboard", request.url));
+        const response = NextResponse.redirect(new URL("/dashboard", request.url));
+        applySecurityHeaders(response);
+        return response;
       }
     }
-    return NextResponse.next();
+    const response = NextResponse.next();
+    applySecurityHeaders(response);
+    return response;
   }
 
   // Protect dashboard and API routes
@@ -77,7 +90,15 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  applySecurityHeaders(response);
+  return response;
+}
+
+function applySecurityHeaders(response: NextResponse): void {
+  for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+    response.headers.set(key, value);
+  }
 }
 
 export const config = {

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { verifyWebhookSignature, handleSubscriptionCreated, handleSubscriptionUpdated, SUBSCRIPTION_PLANS } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (error) {
-    console.error("Error en webhook de Stripe:", error);
+    console.error("Error en webhook de Stripe:", (error as Error).message);
     return NextResponse.json(
       { success: false, error: "Error procesando webhook" },
       { status: 500 }

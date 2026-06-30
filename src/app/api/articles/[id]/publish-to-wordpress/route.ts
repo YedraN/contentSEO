@@ -65,7 +65,7 @@ export async function POST(
     const result = await publishPostToWordPress(
       {
         url: user.wordpressUrl,
-        username: user.wordpressUsername,
+        username: decrypt(user.wordpressUsername),
         password: decrypt(user.wordpressPassword),
       },
       {
@@ -91,6 +91,17 @@ export async function POST(
       },
     });
 
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    await prisma.auditLog.create({
+      data: {
+        userId,
+        action: "wp_published",
+        ipAddress: ip,
+        userAgent: request.headers.get("user-agent") ?? null,
+        metadata: { articleId: params.id, postId: result.postId, status },
+      },
+    }).catch(() => {/* non-blocking */});
+
     return NextResponse.json({
       success: true,
       data: {
@@ -99,7 +110,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error("Error publicando a WordPress:", error);
+    console.error("Error publicando a WordPress:", (error as Error).message);
     return NextResponse.json({ success: false, error: "Error en el servidor" }, { status: 500 });
   }
 }
