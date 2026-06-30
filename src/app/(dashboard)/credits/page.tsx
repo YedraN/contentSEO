@@ -154,23 +154,23 @@ export default function CreditsPage() {
             <div
               key={plan.id}
               className={classNames(
-                "relative rounded-2xl p-6 border-2 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col",
+                "relative rounded-2xl p-6 border-2 bg-white transition-all duration-300 hover:-translate-y-1 flex flex-col",
                 isCurrent
                   ? "border-brand-500 shadow-lg shadow-brand-500/10"
                   : plan.popular
-                  ? "border-brand-200 shadow-sm"
-                  : "border-gray-100 shadow-sm"
+                  ? "border-brand-300 shadow-xl shadow-brand-500/10 scale-[1.02]"
+                  : "border-gray-100 shadow-sm hover:shadow-lg"
               )}
             >
               {plan.popular && !isCurrent && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-brand-600 to-purple-600 text-white text-xs font-bold rounded-full shadow-sm whitespace-nowrap">
-                  Más popular
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 bg-gradient-to-r from-brand-600 to-purple-600 text-white text-xs font-bold rounded-full shadow-md whitespace-nowrap tracking-wide uppercase">
+                  ⭐ Más popular
                 </div>
               )}
 
               {isCurrent && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-green-500 text-white text-xs font-bold rounded-full shadow-sm">
-                  Plan actual
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 bg-emerald-500 text-white text-xs font-bold rounded-full shadow-md tracking-wide uppercase">
+                  ✓ Plan actual
                 </div>
               )}
 

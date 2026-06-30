@@ -99,14 +99,18 @@ export default function DashboardPage() {
             label: "Créditos disponibles",
             value: isLoading ? "—" : stats.credits.toString(),
             sub: "artículos restantes",
-            accent: "from-brand-500 to-brand-600",
+            topColor: "bg-brand-500",
+            iconColor: "text-brand-500",
+            iconPath: "M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z",
             action: { href: "/credits", label: "Recargar" },
           },
           {
             label: "Artículos generados",
             value: isLoading ? "—" : stats.articlesTotal.toString(),
             sub: "en total",
-            accent: "from-purple-500 to-purple-600",
+            topColor: "bg-purple-500",
+            iconColor: "text-purple-500",
+            iconPath: "M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z",
             action: { href: "/history", label: "Ver todos" },
           },
           {
@@ -115,24 +119,29 @@ export default function DashboardPage() {
             sub: hasActivePlan
               ? `${stats.credits} crédito${stats.credits !== 1 ? "s" : ""} disponible${stats.credits !== 1 ? "s" : ""}`
               : "Recarga para empezar",
-            accent: hasActivePlan
-              ? "from-emerald-500 to-emerald-600"
-              : "from-gray-400 to-gray-500",
+            topColor: hasActivePlan ? "bg-emerald-500" : "bg-gray-300",
+            iconColor: hasActivePlan ? "text-emerald-500" : "text-gray-400",
+            iconPath: "M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z",
             action: { href: "/credits", label: hasActivePlan ? "Ver plan" : "Ver planes" },
           },
         ].map((card, i) => (
-          <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-3">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{card.label}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{card.value}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{card.sub}</p>
+          <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+            <div className={`h-1 w-full ${card.topColor}`} />
+            <div className="p-6 flex flex-col gap-4 flex-1">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{card.label}</p>
+                  <p className="text-4xl font-bold text-gray-900 mt-2 tracking-tight">{card.value}</p>
+                  <p className="text-xs text-gray-400 mt-1">{card.sub}</p>
+                </div>
+                <svg className={`w-6 h-6 ${card.iconColor} opacity-80 mt-0.5`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d={card.iconPath} />
+                </svg>
               </div>
-              <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${card.accent} opacity-90`} />
+              <Link href={card.action.href} className="text-xs font-semibold text-brand-600 hover:text-brand-700 transition-colors mt-auto">
+                {card.action.label} →
+              </Link>
             </div>
-            <Link href={card.action.href} className="text-xs font-semibold text-brand-600 hover:text-brand-700 transition-colors">
-              {card.action.label} →
-            </Link>
           </div>
         ))}
       </div>

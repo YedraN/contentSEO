@@ -243,6 +243,12 @@ export default function HistoryPage() {
                         </button>
                       ))}
                     </div>
+                    <Link
+                      href={`/articles/${article.id}`}
+                      className="px-3 py-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-lg transition-all"
+                    >
+                      Ver →
+                    </Link>
                   </div>
                 </div>
               </li>

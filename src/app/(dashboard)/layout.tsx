@@ -22,16 +22,16 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16 lg:pt-20">
+    <div className="min-h-screen bg-gray-50/80 pt-16 lg:pt-20">
       <div className="flex">
         {/* Sidebar */}
         <aside
           className={classNames(
-            "fixed left-0 top-16 lg:top-20 bottom-0 z-40 w-64 bg-white border-r border-gray-100 transition-transform duration-300 lg:translate-x-0 overflow-y-auto",
+            "fixed left-0 top-16 lg:top-20 bottom-0 z-40 w-64 bg-slate-900 transition-transform duration-300 lg:translate-x-0 overflow-y-auto flex flex-col",
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
-          <nav className="p-4 space-y-1">
+          <nav className="flex-1 p-3 space-y-0.5 pt-4">
             {sidebarLinks.map((link) => {
               const isActive =
                 link.href === "/dashboard"
@@ -43,14 +43,20 @@ export default function DashboardLayout({
                   href={link.href}
                   onClick={() => setSidebarOpen(false)}
                   className={classNames(
-                    "flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200",
+                    "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-150 group relative",
                     isActive
-                      ? "bg-brand-50 text-brand-700 font-semibold"
-                      : "text-gray-600 hover:text-brand-600 hover:bg-brand-50"
+                      ? "bg-white/10 text-white"
+                      : "text-slate-400 hover:text-white hover:bg-white/8"
                   )}
                 >
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-brand-400 rounded-r-full" />
+                  )}
                   <svg
-                    className={classNames("w-5 h-5", isActive ? "text-brand-600" : "text-gray-400")}
+                    className={classNames(
+                      "w-[18px] h-[18px] shrink-0 transition-colors",
+                      isActive ? "text-brand-400" : "text-slate-500 group-hover:text-slate-300"
+                    )}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -58,14 +64,16 @@ export default function DashboardLayout({
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" d={link.icon} />
                   </svg>
-                  {link.label}
-                  {isActive && (
-                    <span className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-500" />
-                  )}
+                  <span className={isActive ? "font-semibold" : ""}>{link.label}</span>
                 </Link>
               );
             })}
           </nav>
+
+          {/* Bottom divider line */}
+          <div className="mx-3 mb-4 pt-3 border-t border-white/8">
+            <p className="text-xs text-slate-600 px-3">FeatSEO · v0.1</p>
+          </div>
         </aside>
 
         {/* Main content */}
@@ -73,9 +81,9 @@ export default function DashboardLayout({
           {/* Mobile sidebar toggle */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden fixed bottom-6 right-6 z-50 w-12 h-12 bg-brand-600 text-white rounded-full shadow-lg flex items-center justify-center"
+            className="lg:hidden fixed bottom-6 right-6 z-50 w-12 h-12 bg-slate-900 text-white rounded-full shadow-lg shadow-black/30 flex items-center justify-center"
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
@@ -89,7 +97,7 @@ export default function DashboardLayout({
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/20 lg:hidden"
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
       )}
