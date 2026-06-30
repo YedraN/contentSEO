@@ -2,7 +2,7 @@ import React from "react";
 import { classNames } from "@/lib/utils";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "danger" | "ghost" | "outline";
+  variant?: "primary" | "accent" | "secondary" | "danger" | "ghost" | "outline";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
   children: React.ReactNode;
@@ -11,6 +11,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const variantStyles: Record<string, string> = {
   primary:
     "bg-gradient-to-r from-brand-600 to-brand-700 text-white hover:from-brand-700 hover:to-brand-800 shadow-lg shadow-brand-600/25 hover:shadow-xl hover:shadow-brand-600/30",
+  accent:
+    "bg-gradient-to-r from-accent-600 to-accent-700 text-white hover:from-accent-700 hover:to-accent-800 shadow-lg shadow-accent-600/25 hover:shadow-xl hover:shadow-accent-600/30",
   secondary:
     "bg-gray-100 text-gray-900 hover:bg-gray-200",
   danger:
@@ -46,7 +48,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || isLoading}
         className={classNames(
           "inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200",
-          "focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2",
+          variant === "accent" && "focus-visible:ring-accent-500",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none",
           "active:scale-[0.97]",
           variantStyles[variant],

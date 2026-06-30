@@ -1,10 +1,21 @@
 import type { Metadata, MetadataRoute } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/contexts/AuthContext";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-jakarta",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://featseo.com"),
@@ -77,7 +88,7 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${jakarta.variable} font-sans`}>
         <AuthProvider>
           {children}
           <Toaster position="top-right" />

@@ -37,6 +37,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(data.data);
       } else {
         setUser(null);
+        // The token cookie has a valid signature (so middleware keeps
+        // redirecting auth pages to /dashboard) but no matching user exists
+        // in the DB — e.g. the database was reset. Clear the orphan cookie to
+        // break the /login ⇄ /dashboard redirect loop (blank white screen).
+        if (res.status === 401) {
+          await fetch("/api/auth/logout", { method: "POST" });
+        }
       }
     } catch {
       setUser(null);

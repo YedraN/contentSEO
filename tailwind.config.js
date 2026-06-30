@@ -20,6 +20,25 @@ module.exports = {
           800: "#3730a3",
           900: "#312e81",
         },
+        // Accent — emerald. Reserved for highlighting what matters:
+        // key metrics, positive/success states, "live" indicators.
+        // WCAG-tuned: accent-600 (#059669) on white = 3.7:1.
+        accent: {
+          50: "#ecfdf5",
+          100: "#d1fae5",
+          200: "#a7f3d0",
+          300: "#6ee7b7",
+          400: "#34d399",
+          500: "#10b981",
+          600: "#059669",
+          700: "#047857",
+          800: "#065f46",
+          900: "#064e3b",
+        },
+      },
+      fontFamily: {
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        display: ["var(--font-jakarta)", "var(--font-inter)", "sans-serif"],
       },
       animation: {
         "fade-in": "fadeIn 0.6s ease-out",

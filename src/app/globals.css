@@ -9,8 +9,22 @@
   body {
     @apply text-gray-900 antialiased;
   }
+  /* Display typeface (Plus Jakarta Sans) for headings — tighter tracking
+     for a more deliberate, enterprise feel. Body stays on Inter. */
+  h1, h2, h3 {
+    font-family: var(--font-jakarta), var(--font-inter), sans-serif;
+    @apply tracking-tight;
+  }
   ::selection {
     @apply bg-brand-600/20 text-brand-900;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
@@ -23,6 +37,21 @@
   }
   .gradient-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-600 to-purple-600;
+  }
+  /* Accent (emerald) — for emphasising the single most important thing
+     in a view: a hero metric, a positive delta, a "live" pill. */
+  .accent-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent-600 to-accent-500;
+  }
+  .accent-pill {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-accent-50 px-2.5 py-0.5 text-xs font-semibold text-accent-700 ring-1 ring-inset ring-accent-600/20;
+  }
+  .accent-dot {
+    @apply relative inline-flex h-2 w-2 rounded-full bg-accent-500;
+  }
+  .accent-dot::after {
+    content: "";
+    @apply absolute inset-0 rounded-full bg-accent-500 animate-ping;
   }
   .gradient-border {
     @apply relative;

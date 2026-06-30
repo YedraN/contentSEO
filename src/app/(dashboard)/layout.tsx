@@ -97,12 +97,12 @@ export default function DashboardLayout({
                   )}
                 >
                   {isActive && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-brand-400 rounded-r-full" />
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-accent-400 rounded-r-full" />
                   )}
                   <svg
                     className={classNames(
                       "w-[18px] h-[18px] shrink-0 transition-colors",
-                      isActive ? "text-brand-400" : "text-slate-500 group-hover:text-slate-300"
+                      isActive ? "text-accent-400" : "text-slate-500 group-hover:text-slate-300"
                     )}
                     fill="none"
                     viewBox="0 0 24 24"
