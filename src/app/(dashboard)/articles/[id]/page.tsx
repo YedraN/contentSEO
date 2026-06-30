@@ -40,7 +40,7 @@ export default function ArticlePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 lg:pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 animate-pulse space-y-4">
             <div className="h-8 bg-gray-100 rounded w-3/4" />
@@ -56,14 +56,14 @@ export default function ArticlePage() {
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 lg:pt-24 pb-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 pb-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
         <p className="text-gray-500">Artículo no encontrado</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 lg:pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <ArticlePreview article={article} />
       </div>

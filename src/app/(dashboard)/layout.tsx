@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { classNames } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import DashboardTopbar from "@/components/dashboard/DashboardTopbar";
 
 const sidebarLinks = [
   { href: "/dashboard", label: "Dashboard", icon: "M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" },
@@ -19,19 +21,64 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, isLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Auth guard
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace("/login");
+    }
+  }, [isLoading, user, router]);
+
+  // Full-screen loader while checking session
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shadow-lg animate-pulse">
+            <span className="text-white font-bold text-lg">F</span>
+          </div>
+          <div className="flex gap-1">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce"
+                style={{ animationDelay: `${i * 150}ms` }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render anything if not authenticated (redirect in progress)
+  if (!user) return null;
+
   return (
-    <div className="min-h-screen bg-gray-50/80 pt-16 lg:pt-20">
-      <div className="flex">
+    <div className="min-h-screen bg-gray-50/80 flex flex-col">
+      {/* Topbar */}
+      <DashboardTopbar />
+
+      <div className="flex flex-1 min-h-0">
         {/* Sidebar */}
         <aside
           className={classNames(
-            "fixed left-0 top-16 lg:top-20 bottom-0 z-40 w-64 bg-slate-900 transition-transform duration-300 lg:translate-x-0 overflow-y-auto flex flex-col",
+            "fixed left-0 top-14 bottom-0 z-40 w-64 bg-slate-900 transition-transform duration-300 lg:translate-x-0 overflow-y-auto flex flex-col",
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
-          <nav className="flex-1 p-3 space-y-0.5 pt-4">
+          {/* Logo in sidebar (desktop) */}
+          <div className="hidden lg:flex items-center gap-2.5 px-4 py-4 border-b border-white/8">
+            <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-700 rounded-lg flex items-center justify-center shadow-md shrink-0">
+              <span className="text-white font-bold">F</span>
+            </div>
+            <span className="font-bold text-white text-sm tracking-tight">FeatSEO</span>
+          </div>
+
+          <nav className="flex-1 p-3 space-y-0.5 pt-3">
             {sidebarLinks.map((link) => {
               const isActive =
                 link.href === "/dashboard"
@@ -70,18 +117,17 @@ export default function DashboardLayout({
             })}
           </nav>
 
-          {/* Bottom divider line */}
           <div className="mx-3 mb-4 pt-3 border-t border-white/8">
             <p className="text-xs text-slate-600 px-3">FeatSEO · v0.1</p>
           </div>
         </aside>
 
         {/* Main content */}
-        <div className="flex-1 lg:ml-64">
+        <div className="flex-1 lg:ml-64 min-w-0">
           {/* Mobile sidebar toggle */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden fixed bottom-6 right-6 z-50 w-12 h-12 bg-slate-900 text-white rounded-full shadow-lg shadow-black/30 flex items-center justify-center"
+            className="lg:hidden fixed bottom-6 right-6 z-40 w-12 h-12 bg-slate-900 text-white rounded-full shadow-lg shadow-black/30 flex items-center justify-center"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
