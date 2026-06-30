@@ -51,7 +51,10 @@ export default function Navbar() {
             <div className="w-9 h-9 bg-gradient-to-br from-brand-500 to-brand-700 rounded-xl flex items-center justify-center shadow-lg shadow-brand-600/20 group-hover:shadow-xl group-hover:shadow-brand-600/30 transition-all duration-300">
               <span className="text-white font-bold text-lg">F</span>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+            <span className={classNames(
+              "text-xl font-bold transition-colors duration-300",
+              isScrolled ? "bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent" : "text-white"
+            )}>
               FeatSEO
             </span>
           </Link>
@@ -62,7 +65,12 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all duration-200"
+                  className={classNames(
+                    "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200",
+                    isScrolled
+                      ? "text-gray-600 hover:text-brand-600 hover:bg-brand-50"
+                      : "text-slate-300 hover:text-white hover:bg-white/10"
+                  )}
                 >
                   {link.label}
                 </Link>
@@ -75,7 +83,10 @@ export default function Navbar() {
               <>
                 <Link
                   href="/settings"
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all duration-200"
+                  className={classNames(
+                    "flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200",
+                    isScrolled ? "text-gray-600 hover:text-brand-600 hover:bg-brand-50" : "text-slate-300 hover:text-white hover:bg-white/10"
+                  )}
                 >
                   <div className="w-7 h-7 bg-gradient-to-br from-brand-400 to-brand-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">
                     {(user?.name ?? "?").charAt(0).toUpperCase()}
@@ -88,9 +99,17 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" onClick={() => router.push("/login")}>
+                <button
+                  onClick={() => router.push("/login")}
+                  className={classNames(
+                    "px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200",
+                    isScrolled
+                      ? "text-gray-700 hover:text-brand-600 hover:bg-gray-100"
+                      : "text-slate-300 hover:text-white hover:bg-white/10"
+                  )}
+                >
                   Iniciar sesión
-                </Button>
+                </button>
                 <Button size="sm" onClick={() => router.push("/register")}>
                   Registrarse
                 </Button>
@@ -105,19 +124,22 @@ export default function Navbar() {
             <div className="w-5 flex flex-col gap-1.5">
               <span
                 className={classNames(
-                  "block h-0.5 bg-gray-600 rounded transition-all duration-300",
+                  "block h-0.5 rounded transition-all duration-300",
+                  isScrolled ? "bg-gray-600" : "bg-white",
                   isMenuOpen ? "rotate-45 translate-y-[4px]" : ""
                 )}
               />
               <span
                 className={classNames(
-                  "block h-0.5 bg-gray-600 rounded transition-all duration-300",
+                  "block h-0.5 rounded transition-all duration-300",
+                  isScrolled ? "bg-gray-600" : "bg-white",
                   isMenuOpen ? "opacity-0" : ""
                 )}
               />
               <span
                 className={classNames(
-                  "block h-0.5 bg-gray-600 rounded transition-all duration-300",
+                  "block h-0.5 rounded transition-all duration-300",
+                  isScrolled ? "bg-gray-600" : "bg-white",
                   isMenuOpen ? "-rotate-45 -translate-y-[4px]" : ""
                 )}
               />
